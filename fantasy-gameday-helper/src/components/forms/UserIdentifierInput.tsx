@@ -121,11 +121,12 @@ export function UserIdentifierInput({ onUserLoaded, className = '' }: UserIdenti
     setValidationError('');
     clearError();
     
-    // Clear persisted data
+    // Clear all persisted data
     try {
       localStorage.removeItem('sleeper_user_identifier');
+      localStorage.removeItem('sleeper_user_teams');
     } catch (error) {
-      console.warn('Failed to clear persisted user identifier:', error);
+      console.warn('Failed to clear persisted data:', error);
     }
   };
 

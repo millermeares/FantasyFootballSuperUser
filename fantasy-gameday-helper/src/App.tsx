@@ -43,6 +43,9 @@ function App() {
     try {
       setLoading(true);
       clearError();
+      
+      // Clear any existing raw data when loading a new user
+      setRawData(null);
 
       // Get user information
       const user = await sleeperApi.getUser(identifier);
@@ -182,13 +185,17 @@ function App() {
   // }, [loadLeagueDataWithWeek, state.selectedWeek]);
 
   /**
-   * Reload data when week changes
+   * Reload data when week changes or refresh is requested
    * Requirements: 7.2, 7.5 - Update data when week selection changes
    */
   const handleWeekChange = useCallback(async (newWeek: number) => {
-    if (state.user && newWeek !== state.selectedWeek) {
-      setWeek(newWeek);
-      // Clear raw data to force fresh fetch for new week
+    if (state.user) {
+      // Update week if it's different
+      if (newWeek !== state.selectedWeek) {
+        setWeek(newWeek);
+      }
+      
+      // Always clear raw data and reload (handles both week change and refresh)
       setRawData(null);
       await loadLeagueDataWithWeek(state.user.user_id, new Date().getFullYear().toString(), newWeek);
     }

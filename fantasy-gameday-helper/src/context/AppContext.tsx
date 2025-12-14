@@ -32,7 +32,14 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         user: null,
+        userTeams: [],
+        gamedayData: null,
         error: null,
+        popupData: {
+          isOpen: false,
+          player: null,
+          leagues: [],
+        },
       };
 
     case 'SET_WEEK':
