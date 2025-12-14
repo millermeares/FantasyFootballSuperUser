@@ -219,12 +219,12 @@ export class PlayerAnalysisService {
     const cheeringAgainst: PlayerAllegiance[] = [];
 
     // Process ALL user players - they all go in cheeringFor with their user counts and leagues
-    for (const [playerId, userCount] of userCounts) {
+    for (const [, userCount] of userCounts) {
       cheeringFor.push(this.createPlayerAllegiance(userCount));
     }
 
     // Process ALL opponent players - they all go in cheeringAgainst with their opponent counts and leagues
-    for (const [playerId, opponentCount] of opponentCounts) {
+    for (const [, opponentCount] of opponentCounts) {
       cheeringAgainst.push(this.createPlayerAllegiance(opponentCount));
     }
 
