@@ -1,0 +1,288 @@
+/* Mobile-specific utilities and optimizations */
+
+/* Touch-friendly interactions */
+@media (hover: none) and (pointer: coarse) {
+  /* Increase touch targets for better accessibility */
+  button,
+  .clickable,
+  .count-button,
+  .checkbox-custom,
+  .sortable-header {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Remove hover effects on touch devices */
+  .sortable-header:hover,
+  .team-item:hover,
+  .player-row:hover {
+    background: inherit;
+  }
+
+  /* Add active states for touch feedback */
+  button:active,
+  .count-button:active,
+  .sortable-header:active {
+    transform: scale(0.98);
+    opacity: 0.8;
+  }
+
+  .team-checkbox-label:active,
+  .bulk-action-button:active {
+    background: rgba(0, 123, 255, 0.1);
+  }
+}
+
+/* Prevent text selection on interactive elements */
+.team-checkbox-label,
+.sortable-header,
+.count-button,
+.bulk-action-button,
+.expand-toggle-button {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Smooth scrolling for mobile */
+@media (max-width: 768px) {
+  .table-container,
+  .team-list,
+  .leagues-list {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Better scrollbar styling for mobile */
+  .table-container::-webkit-scrollbar,
+  .team-list::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  .table-container::-webkit-scrollbar-thumb,
+  .team-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 2px;
+  }
+}
+
+/* Landscape orientation optimizations */
+@media (max-width: 768px) and (orientation: landscape) {
+  .app-header {
+    padding: 0.5rem 0;
+  }
+
+  .app-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .app-subtitle {
+    font-size: 0.875rem;
+  }
+
+  .controls-section {
+    padding: 0.75rem;
+  }
+
+  .table-container {
+    max-height: 40vh;
+  }
+
+  .team-list {
+    max-height: 30vh;
+  }
+}
+
+/* Safe area insets for devices with notches */
+@supports (padding: max(0px)) {
+  .app {
+    padding-left: max(0.5rem, env(safe-area-inset-left));
+    padding-right: max(0.5rem, env(safe-area-inset-right));
+  }
+
+  .app-header {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+
+  @media (max-width: 768px) {
+    .app {
+      padding-left: max(0.25rem, env(safe-area-inset-left));
+      padding-right: max(0.25rem, env(safe-area-inset-right));
+    }
+  }
+}
+
+/* Focus improvements for mobile accessibility */
+@media (max-width: 768px) {
+  button:focus,
+  .count-button:focus,
+  .team-checkbox:focus + .checkbox-custom,
+  .week-select:focus,
+  .form-input:focus {
+    outline: 3px solid #007bff;
+    outline-offset: 2px;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .expand-icon,
+  .loading-spinner,
+  .count-button,
+  .bulk-action-button,
+  .team-item,
+  .player-row,
+  .league-popup-backdrop,
+  .league-popup-container {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  button:active,
+  .count-button:active,
+  .sortable-header:active {
+    transform: none !important;
+  }
+}
+
+/* High contrast mode improvements */
+@media (prefers-contrast: high) {
+  .player-table,
+  .team-filter,
+  .user-identifier-input,
+  .week-selector {
+    border-width: 2px;
+    border-color: #000;
+  }
+
+  .count-button,
+  .bulk-action-button,
+  .submit-button,
+  .refresh-week-button {
+    border: 2px solid currentColor;
+  }
+
+  .checkbox-custom {
+    border-width: 3px;
+    border-color: #000;
+  }
+}
+
+/* Print styles for mobile */
+@media print {
+  .app-header {
+    padding: 0.5rem 0;
+  }
+
+  .controls-section,
+  .bulk-actions,
+  .refresh-week-button,
+  .change-user-button,
+  .count-button {
+    display: none !important;
+  }
+
+  .tables-container {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .player-table,
+  .team-filter {
+    box-shadow: none !important;
+    border: 1px solid #000 !important;
+  }
+}
+
+/* Loading state improvements for mobile */
+@media (max-width: 768px) {
+  .loading-indicator {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+  }
+
+  .loading-spinner {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* Error state improvements for mobile */
+@media (max-width: 768px) {
+  .error-content {
+    position: relative;
+    max-width: calc(100vw - 2rem);
+  }
+
+  .error-retry-button {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+}
+
+/* Utility classes for mobile development */
+.mobile-only {
+  display: none;
+}
+
+.desktop-only {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .mobile-only {
+    display: block;
+  }
+
+  .desktop-only {
+    display: none;
+  }
+}
+
+/* Flexbox utilities for responsive layouts */
+.flex-mobile-column {
+  display: flex;
+}
+
+@media (max-width: 768px) {
+  .flex-mobile-column {
+    flex-direction: column;
+  }
+}
+
+.flex-mobile-wrap {
+  display: flex;
+}
+
+@media (max-width: 768px) {
+  .flex-mobile-wrap {
+    flex-wrap: wrap;
+  }
+}
+
+/* Spacing utilities for mobile */
+@media (max-width: 768px) {
+  .mobile-spacing-sm {
+    margin: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .mobile-spacing-md {
+    margin: 1rem;
+    padding: 1rem;
+  }
+
+  .mobile-spacing-lg {
+    margin: 1.5rem;
+    padding: 1.5rem;
+  }
+}

@@ -1,0 +1,170 @@
+/* Week Selector Component Styles - Simplified */
+
+.week-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.week-selector-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.week-input-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Form elements */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Number input */
+.week-input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  width: 100px;
+  text-align: center;
+}
+
+.week-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.week-input.error {
+  border-color: #dc3545;
+}
+
+.week-input:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Remove spinner arrows from number input */
+.week-input::-webkit-outer-spin-button,
+.week-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+.week-input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Refresh button */
+.refresh-week-button {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #007bff;
+  border-radius: 4px;
+  background: #007bff;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.refresh-week-button:hover:not(:disabled) {
+  background: #0056b3;
+  border-color: #0056b3;
+}
+
+.refresh-week-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Error messages */
+.error-message {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.validation-error {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  padding: 0.5rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .week-input-group {
+    gap: 0.75rem;
+  }
+
+  .week-input {
+    width: 120px;
+  }
+
+  .form-label {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .week-selector {
+    gap: 0.75rem;
+  }
+
+  .week-input-group {
+    gap: 1rem;
+  }
+
+  .week-input {
+    padding: 0.75rem;
+    font-size: 1.1rem;
+    width: 100px;
+  }
+
+  .refresh-week-button {
+    padding: 0.75rem;
+    font-size: 1.3rem;
+    min-height: 48px;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .week-input,
+  .refresh-week-button {
+    border-width: 2px;
+    border-color: #000;
+  }
+
+  .week-input:focus {
+    border-color: #000;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .refresh-week-button {
+    transition: none;
+  }
+}
