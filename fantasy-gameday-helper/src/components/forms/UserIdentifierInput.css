@@ -43,7 +43,13 @@
   border-radius: 6px;
   font-size: 1rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  background: #ffffff;
+  background: #ffffff !important;
+  color: #333333 !important;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-text-fill-color: #333333 !important;
+  -webkit-background-clip: padding-box !important;
+  background-clip: padding-box !important;
 }
 
 .form-input:focus {
@@ -292,6 +298,11 @@
   .form-input {
     font-size: 16px; /* Prevent zoom on iOS */
     padding: 0.875rem;
+    background: #ffffff !important;
+    color: #333333 !important;
+    -webkit-text-fill-color: #333333 !important;
+    -webkit-opacity: 1 !important;
+    opacity: 1 !important;
   }
 
   .submit-button {
@@ -356,5 +367,36 @@
   .retry-button,
   .form-input {
     transition: none;
+  }
+}
+
+/* Mobile-specific input fixes for dark mode override */
+@media (max-width: 768px) {
+  .form-input {
+    background-color: #ffffff !important;
+    color: #333333 !important;
+    -webkit-text-fill-color: #333333 !important;
+    -webkit-background-clip: padding-box !important;
+    background-clip: padding-box !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  }
+  
+  .form-input::placeholder {
+    color: #6c757d !important;
+    -webkit-text-fill-color: #6c757d !important;
+    opacity: 1 !important;
+  }
+  
+  .form-input:focus {
+    background-color: #ffffff !important;
+    color: #333333 !important;
+    -webkit-text-fill-color: #333333 !important;
+  }
+  
+  .form-input:disabled {
+    background-color: #f8f9fa !important;
+    color: #6c757d !important;
+    -webkit-text-fill-color: #6c757d !important;
   }
 }
