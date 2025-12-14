@@ -208,8 +208,8 @@ export class PlayerAnalysisService {
   }
 
   /**
-   * Resolve conflicts when players appear in both user and opponent lineups
-   * Requirement: 4.6 - Player appears in table with higher count
+   * Create independent player lists - no conflict resolution
+   * Each table shows players independently with their respective counts and leagues
    */
   private resolvePlayerConflicts(
     userCounts: Map<string, PlayerCount>,
@@ -217,41 +217,15 @@ export class PlayerAnalysisService {
   ): { cheeringFor: PlayerAllegiance[]; cheeringAgainst: PlayerAllegiance[] } {
     const cheeringFor: PlayerAllegiance[] = [];
     const cheeringAgainst: PlayerAllegiance[] = [];
-    const processedPlayers = new Set<string>();
 
-    // Process user players first
+    // Process ALL user players - they all go in cheeringFor with their user counts and leagues
     for (const [playerId, userCount] of userCounts) {
-      const opponentCount = opponentCounts.get(playerId);
-      
-      if (!opponentCount) {
-        // Player only appears in user lineups
-        cheeringFor.push(this.createPlayerAllegiance(userCount));
-      } else {
-        // Player appears in both - use higher count
-        if (userCount.count >= opponentCount.count) {
-          // Combine league information from both sides
-          const combinedLeagues = [...new Set([...userCount.leagues, ...opponentCount.leagues])];
-          cheeringFor.push(this.createPlayerAllegiance({
-            ...userCount,
-            leagues: combinedLeagues
-          }));
-        } else {
-          // Opponent count is higher
-          const combinedLeagues = [...new Set([...userCount.leagues, ...opponentCount.leagues])];
-          cheeringAgainst.push(this.createPlayerAllegiance({
-            ...opponentCount,
-            leagues: combinedLeagues
-          }));
-        }
-      }
-      processedPlayers.add(playerId);
+      cheeringFor.push(this.createPlayerAllegiance(userCount));
     }
 
-    // Process remaining opponent players (those not in user lineups)
+    // Process ALL opponent players - they all go in cheeringAgainst with their opponent counts and leagues
     for (const [playerId, opponentCount] of opponentCounts) {
-      if (!processedPlayers.has(playerId)) {
-        cheeringAgainst.push(this.createPlayerAllegiance(opponentCount));
-      }
+      cheeringAgainst.push(this.createPlayerAllegiance(opponentCount));
     }
 
     return { cheeringFor, cheeringAgainst };

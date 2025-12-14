@@ -178,17 +178,17 @@ describe('PlayerAnalysisService', () => {
       }
     });
 
-    it('should handle conflict resolution correctly', () => {
-      // Modify mock data to create a conflict scenario
+    it('should handle players appearing in both tables independently', () => {
+      // Modify mock data to create a scenario where player appears in both user and opponent lineups
       const conflictInput = { ...mockInput };
       const conflictMatchups = new Map(mockInput.matchups);
       
-      // Make player1 appear in opponent lineup with higher count
+      // Make player1 appear in both user and opponent lineups
       conflictMatchups.set('league1', [
         {
           roster_id: 1,
           matchup_id: 1,
-          starters: ['player1', 'player2'],
+          starters: ['player1', 'player2'], // player1 in user lineup
           players: ['player1', 'player2', 'player3'],
           points: 120.5,
           custom_points: null
@@ -196,7 +196,7 @@ describe('PlayerAnalysisService', () => {
         {
           roster_id: 3,
           matchup_id: 1,
-          starters: ['player1', 'player4'], // player1 now in opponent lineup too
+          starters: ['player1', 'player4'], // player1 also in opponent lineup
           players: ['player1', 'player4', 'player6'],
           points: 115.2,
           custom_points: null
@@ -215,7 +215,7 @@ describe('PlayerAnalysisService', () => {
         {
           roster_id: 4,
           matchup_id: 2,
-          starters: ['player1', 'player9'], // player1 in opponent lineup here too
+          starters: ['player1', 'player9'], // player1 in opponent lineup again
           players: ['player1', 'player9', 'player10'],
           points: 125.3,
           custom_points: null
@@ -226,15 +226,18 @@ describe('PlayerAnalysisService', () => {
 
       const result = service.analyzePlayerData(conflictInput);
 
-      // player1 appears 1 time in user lineups and 2 times in opponent lineups
-      // Should be in cheeringAgainst with count 2
-      const player1 = result.cheeringAgainst.find(p => p.playerId === 'player1');
-      expect(player1).toBeDefined();
-      expect(player1?.count).toBe(2);
-      
-      // Should not be in cheeringFor
+      // player1 should appear in BOTH tables independently
+      // In cheeringFor: appears 1 time (league1 user lineup)
       const player1InCheeringFor = result.cheeringFor.find(p => p.playerId === 'player1');
-      expect(player1InCheeringFor).toBeUndefined();
+      expect(player1InCheeringFor).toBeDefined();
+      expect(player1InCheeringFor?.count).toBe(1);
+      expect(player1InCheeringFor?.leagues).toEqual(['Test League 1']);
+      
+      // In cheeringAgainst: appears 2 times (league1 and league2 opponent lineups)
+      const player1InCheeringAgainst = result.cheeringAgainst.find(p => p.playerId === 'player1');
+      expect(player1InCheeringAgainst).toBeDefined();
+      expect(player1InCheeringAgainst?.count).toBe(2);
+      expect(player1InCheeringAgainst?.leagues).toEqual(['Test League 1', 'Test League 2']);
     });
 
     it('should respect team selection filters', () => {
