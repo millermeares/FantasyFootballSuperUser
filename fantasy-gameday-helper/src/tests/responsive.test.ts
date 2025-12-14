@@ -16,7 +16,7 @@ describe('Responsive Design Implementation', () => {
 
   it('should have proper viewport meta tag configuration', () => {
     // Test that viewport configuration is correct for mobile
-    const viewportMeta = document.querySelector('meta[name="viewport"]');
+    // const viewportMeta = document.querySelector('meta[name="viewport"]');
     
     // In test environment, we might not have the meta tag, so we'll check if it would be valid
     const expectedViewport = 'width=device-width, initial-scale=1.0';

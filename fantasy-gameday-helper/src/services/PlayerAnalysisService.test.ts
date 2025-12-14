@@ -474,7 +474,7 @@ describe('PlayerAnalysisService', () => {
             }
 
             // Property 3: Completeness - all expected players should be present
-            expectedCounts.forEach((expectedCount, playerId) => {
+            expectedCounts.forEach((_, playerId) => {
               const foundPlayer = result.cheeringFor.find(p => p.playerId === playerId);
               expect(foundPlayer).toBeDefined();
             });
@@ -824,7 +824,7 @@ describe('PlayerAnalysisService', () => {
 
             // Property 4: Completeness - all expected opponent players should appear somewhere
             // (either in cheeringAgainst or cheeringFor due to conflict resolution)
-            expectedOpponentCounts.forEach((expectedCount, playerId) => {
+            expectedOpponentCounts.forEach((_, playerId) => {
               const foundInCheeringAgainst = result.cheeringAgainst.find(p => p.playerId === playerId);
               const foundInCheeringFor = result.cheeringFor.find(p => p.playerId === playerId);
               const foundSomewhere = foundInCheeringAgainst || foundInCheeringFor;

@@ -205,7 +205,7 @@ describe('AppContext', () => {
       // Generate a league ID to toggle (must be one from the teams)
       (teams: UserTeam[]) => {
         // Ensure we have unique league IDs
-        const uniqueTeams = teams.reduce((acc, team, index) => {
+        const uniqueTeams = teams.reduce((acc, team) => {
           const existingIndex = acc.findIndex(t => t.leagueId === team.leagueId);
           if (existingIndex === -1) {
             acc.push(team);

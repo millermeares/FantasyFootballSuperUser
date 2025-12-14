@@ -3,7 +3,7 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 import { AppProvider } from './context';
-import * as SleeperApiService from './services/api/SleeperApiService';
+// import * as SleeperApiService from './services/api/SleeperApiService';
 
 // Mock the Sleeper API service
 const mockSleeperApi = {

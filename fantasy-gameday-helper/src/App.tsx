@@ -177,9 +177,9 @@ function App() {
    * Load league data and generate gameday analysis (uses current selected week)
    * Requirements: 1.2, 2.1 - Load team data and set up team filter
    */
-  const loadLeagueData = useCallback(async (userId: string, season: string) => {
-    return loadLeagueDataWithWeek(userId, season, state.selectedWeek);
-  }, [loadLeagueDataWithWeek, state.selectedWeek]);
+  // const loadLeagueData = useCallback(async (userId: string, season: string) => {
+  //   return loadLeagueDataWithWeek(userId, season, state.selectedWeek);
+  // }, [loadLeagueDataWithWeek, state.selectedWeek]);
 
   /**
    * Reload data when week changes

@@ -6,7 +6,7 @@
 
 import { PlayerAnalysisService } from './PlayerAnalysisService';
 import type { AnalysisInput } from '../types/app';
-import type { SleeperLeague, SleeperRoster, SleeperMatchup } from '../types/sleeper';
+// import type { SleeperLeague, SleeperRoster, SleeperMatchup } from '../types/sleeper';
 
 // Example function showing how to use PlayerAnalysisService
 export async function examplePlayerAnalysis() {
@@ -281,8 +281,8 @@ export function exampleErrorHandling() {
 }
 
 // Run examples if this file is executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  examplePlayerAnalysis()
-    .then(() => exampleErrorHandling())
-    .catch(console.error);
-}
+// if (import.meta.url === `file://${process.argv[1]}`) {
+//   examplePlayerAnalysis()
+//     .then(() => exampleErrorHandling())
+//     .catch(console.error);
+// }

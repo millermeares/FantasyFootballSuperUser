@@ -22,3 +22,20 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment variables (keep .env.example)
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# AWS Amplify
+amplify/
+.amplifyrc
+
+# Coverage reports
+coverage/
+*.lcov
+
+# Build analysis
+stats.html

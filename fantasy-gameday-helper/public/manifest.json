@@ -1,0 +1,20 @@
+{
+  "name": "Fantasy Gameday Helper",
+  "short_name": "Gameday Helper",
+  "description": "Know which players to cheer for or against across all your fantasy teams",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#007bff",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["sports", "utilities"],
+  "lang": "en-US"
+}
