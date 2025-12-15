@@ -1,8 +1,7 @@
 import { useEffect, useCallback, useState } from 'react';
 import { useAppContext, getPersistedUserIdentifier } from './context';
 import { UserIdentifierInput, WeekSelector, TeamFilter } from './components/forms';
-import { PlayerTable } from './components/tables';
-import { LeagueInfoPopup } from './components/ui';
+import { LeagueInfoPopup, TabNavigation } from './components/ui';
 import { getSleeperApiService } from './services/api/SleeperApiService';
 import { playerAnalysisService } from './services/PlayerAnalysisService';
 
@@ -361,43 +360,10 @@ function App() {
               </div>
             )}
 
-            {/* Player tables section */}
-            {state.gamedayData && (
-              <div className="player-tables-section">
-                <div className="tables-container">
-                  {/* Cheering For table */}
-                  <div className="table-section">
-                    <PlayerTable
-                      title="Players to Cheer For"
-                      subtitle={`${state.gamedayData.cheeringFor.length} players in your starting lineups`}
-                      players={state.gamedayData.cheeringFor}
-                      onCountClick={handlePlayerCountClick}
-                      emptyMessage="No players found in your selected teams' starting lineups"
-                    />
-                  </div>
-
-                  {/* Cheering Against table */}
-                  <div className="table-section">
-                    <PlayerTable
-                      title="Players to Cheer Against"
-                      subtitle={`${state.gamedayData.cheeringAgainst.length} players in opponent lineups`}
-                      players={state.gamedayData.cheeringAgainst}
-                      onCountClick={handlePlayerCountClick}
-                      emptyMessage="No opponent players found for your selected teams"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Empty state when no gameday data */}
-            {state.user && !state.gamedayData && !state.loading && (
-              <div className="empty-gameday-state">
-                <h3>No gameday data available</h3>
-                <p>
-                  Make sure you have teams in active leagues for the selected week, 
-                  and that matchups are available.
-                </p>
+            {/* Tabbed interface for gameday and exposure views */}
+            {state.userTeams.length > 0 && (
+              <div className="tabbed-interface-section">
+                <TabNavigation onPlayerCountClick={handlePlayerCountClick} />
               </div>
             )}
           </div>

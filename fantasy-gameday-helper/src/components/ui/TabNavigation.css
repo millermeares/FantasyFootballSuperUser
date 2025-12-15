@@ -1,0 +1,437 @@
+.tab-navigation {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Desktop layout - tabs at top */
+.tab-buttons {
+  display: flex;
+  border-bottom: 2px solid #e0e0e0;
+  background-color: #f8f9fa;
+  order: 1; /* Tabs first on desktop */
+  position: relative;
+  z-index: 10;
+}
+
+.tab-content {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  order: 2; /* Content second on desktop */
+  position: relative;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background-color: transparent;
+  color: #666;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 3px solid transparent;
+  position: relative;
+  min-height: 48px; /* Ensure minimum touch target size */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.tab-button:hover {
+  background-color: #e9ecef;
+  color: #333;
+}
+
+.tab-button.active {
+  color: #007bff;
+  border-bottom-color: #007bff;
+  background-color: #fff;
+  font-weight: 600;
+}
+
+.tab-button:focus {
+  outline: 2px solid #007bff;
+  outline-offset: -2px;
+}
+
+.tab-button:focus-visible {
+  outline: 3px solid #007bff;
+  outline-offset: 2px;
+}
+
+/* Tab content styling */
+.gameday-content,
+.exposure-content {
+  height: 100%;
+  width: 100%;
+}
+
+.placeholder-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  background-color: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  color: #6c757d;
+  text-align: center;
+}
+
+.placeholder-content h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+}
+
+.placeholder-content p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Mobile layout - tabs at bottom */
+@media (max-width: 768px) {
+  .tab-navigation {
+    flex-direction: column-reverse; /* Reverse order for mobile */
+    height: 100vh; /* Full viewport height on mobile */
+  }
+  
+  .tab-buttons {
+    order: 2; /* Tabs at bottom on mobile */
+    border-bottom: none;
+    border-top: 2px solid #e0e0e0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background-color: #f8f9fa;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    /* Safe area support for devices with home indicators */
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
+  
+  .tab-content {
+    order: 1; /* Content at top on mobile */
+    padding: 0.75rem 0.75rem calc(80px + env(safe-area-inset-bottom)) 0.75rem; /* Add bottom padding for fixed tabs */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    height: calc(100vh - 80px - env(safe-area-inset-bottom)); /* Account for tab height */
+  }
+  
+  .tab-button {
+    padding: 1rem 0.75rem;
+    font-size: 0.9rem;
+    border-bottom: none;
+    border-top: 3px solid transparent;
+    min-height: 64px; /* Larger touch-friendly height */
+    min-width: 44px; /* Minimum touch target width */
+    font-weight: 500;
+    /* Better touch feedback */
+    -webkit-tap-highlight-color: rgba(0, 123, 255, 0.1);
+  }
+  
+  .tab-button.active {
+    border-bottom: none;
+    border-top-color: #007bff;
+    background-color: #fff;
+    font-weight: 600;
+  }
+  
+  /* Enhanced touch feedback for mobile */
+  .tab-button:active {
+    background-color: #dee2e6;
+    transform: scale(0.98);
+  }
+  
+  .tab-button:hover {
+    /* Remove hover effects on touch devices */
+    background-color: transparent;
+  }
+}
+
+/* Tablet landscape - hybrid approach */
+@media (min-width: 769px) and (max-width: 1024px) and (orientation: landscape) {
+  .tab-button {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.95rem;
+    min-height: 52px;
+  }
+  
+  .tab-content {
+    padding: 0.875rem;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .tab-button {
+    padding: 0.875rem 0.5rem;
+    font-size: 0.85rem;
+    min-height: 60px; /* Maintain touch-friendly size */
+  }
+  
+  .tab-content {
+    padding: 0.5rem 0.5rem calc(76px + env(safe-area-inset-bottom)) 0.5rem;
+    height: calc(100vh - 76px - env(safe-area-inset-bottom));
+  }
+  
+  .placeholder-content {
+    height: 150px;
+    padding: 1rem;
+  }
+  
+  .placeholder-content h3 {
+    font-size: 1.1rem;
+  }
+  
+  .placeholder-content p {
+    font-size: 0.8rem;
+  }
+}
+
+/* Large screens - enhanced desktop experience */
+@media (min-width: 1200px) {
+  .tab-button {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    min-height: 56px;
+  }
+  
+  .tab-content {
+    padding: 1.5rem;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .tab-button {
+    min-height: 64px; /* Larger touch targets */
+    min-width: 44px;
+    -webkit-tap-highlight-color: rgba(0, 123, 255, 0.1);
+  }
+  
+  .tab-button:hover {
+    background-color: transparent; /* Remove hover on touch devices */
+    color: #666;
+  }
+  
+  .tab-button:active {
+    background-color: rgba(0, 123, 255, 0.1);
+    transform: scale(0.98);
+  }
+  
+  .tab-button.active:hover {
+    background-color: #fff;
+    color: #007bff;
+  }
+}
+
+/* Pointer device optimizations */
+@media (hover: hover) and (pointer: fine) {
+  .tab-button:hover {
+    background-color: #e9ecef;
+    color: #333;
+  }
+  
+  .tab-button.active:hover {
+    background-color: #f8f9ff;
+    color: #0056b3;
+  }
+}
+
+/* Landscape orientation on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .tab-buttons {
+    position: relative; /* Use relative positioning in landscape */
+    box-shadow: none;
+  }
+  
+  .tab-content {
+    padding: 0.5rem 0.75rem 0.5rem 0.75rem; /* Remove bottom padding in landscape */
+    height: auto; /* Auto height in landscape */
+  }
+  
+  .tab-button {
+    min-height: 48px; /* Smaller height in landscape */
+    padding: 0.75rem 0.75rem;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .tab-button {
+    transition: none;
+  }
+  
+  .tab-button:active {
+    transform: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .tab-button {
+    border: 2px solid #333;
+    margin: 1px;
+  }
+  
+  .tab-button.active {
+    background-color: #000;
+    color: #fff;
+    border-color: #000;
+  }
+  
+  .tab-buttons {
+    border-color: #000;
+    border-width: 2px;
+  }
+  
+  .placeholder-content {
+    border-color: #333;
+    color: #000;
+    border-width: 2px;
+  }
+}
+
+/* Focus improvements for keyboard navigation */
+.tab-button:focus-visible {
+  outline: 3px solid #007bff;
+  outline-offset: 2px;
+  z-index: 1;
+}
+
+/* Dark mode support (if implemented) */
+@media (prefers-color-scheme: dark) {
+  .tab-buttons {
+    background-color: #2d3748;
+    border-color: #4a5568;
+  }
+  
+  .tab-button {
+    color: #e2e8f0;
+  }
+  
+  .tab-button:hover {
+    background-color: #4a5568;
+    color: #f7fafc;
+  }
+  
+  .tab-button.active {
+    background-color: #1a202c;
+    color: #63b3ed;
+    border-bottom-color: #63b3ed;
+  }
+  
+  @media (max-width: 768px) {
+    .tab-button.active {
+      border-top-color: #63b3ed;
+      border-bottom-color: transparent;
+    }
+  }
+  
+  .placeholder-content {
+    background-color: #2d3748;
+    border-color: #4a5568;
+    color: #a0aec0;
+  }
+}
+
+/* Utility classes for responsive behavior */
+.tab-navigation--desktop {
+  /* Desktop-specific overrides if needed */
+}
+
+.tab-navigation--mobile {
+  /* Mobile-specific overrides if needed */
+}
+
+/* Animation for smooth tab transitions */
+@keyframes tabContentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tab-content > div {
+  animation: tabContentFadeIn 0.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab-content > div {
+    animation: none;
+  }
+}
+
+/* Improved scrolling for tab content */
+.tab-content {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Better visual separation on mobile */
+@media (max-width: 768px) {
+  .tab-buttons::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, #e0e0e0 20%, #e0e0e0 80%, transparent 100%);
+  }
+}
+
+/* Loading state for tab content */
+.tab-content--loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.tab-content--loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 1;
+}
+
+/* Error state for tab content */
+.tab-content--error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #dc3545;
+  text-align: center;
+}
+
+/* Print styles */
+@media print {
+  .tab-buttons {
+    display: none;
+  }
+  
+  .tab-content {
+    padding: 0;
+    order: 1;
+  }
+  
+  .tab-navigation {
+    flex-direction: column;
+  }
+}

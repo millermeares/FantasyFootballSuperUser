@@ -9,6 +9,7 @@ const initialState: AppState = {
   selectedWeek: 1, // Will be updated to current week when available
   userTeams: [],
   gamedayData: null,
+  activeTab: 'gameday',
   loading: false,
   error: null,
   popupData: {
@@ -96,6 +97,12 @@ function appReducer(state: AppState, action: AppAction): AppState {
         error: null,
       };
 
+    case 'SET_ACTIVE_TAB':
+      return {
+        ...state,
+        activeTab: action.payload,
+      };
+
     case 'SET_LOADING':
       return {
         ...state,
@@ -153,6 +160,7 @@ interface AppContextType {
   selectAllTeams: () => void;
   deselectAllTeams: () => void;
   setGamedayData: (data: GamedayData) => void;
+  setActiveTab: (tab: 'gameday' | 'exposure') => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string) => void;
   clearError: () => void;
@@ -264,6 +272,10 @@ export function AppProvider({ children }: AppProviderProps) {
     dispatch({ type: 'SET_GAMEDAY_DATA', payload: data });
   };
 
+  const setActiveTab = (tab: 'gameday' | 'exposure') => {
+    dispatch({ type: 'SET_ACTIVE_TAB', payload: tab });
+  };
+
   const setLoading = (loading: boolean) => {
     dispatch({ type: 'SET_LOADING', payload: loading });
   };
@@ -295,6 +307,7 @@ export function AppProvider({ children }: AppProviderProps) {
     selectAllTeams,
     deselectAllTeams,
     setGamedayData,
+    setActiveTab,
     setLoading,
     setError,
     clearError,

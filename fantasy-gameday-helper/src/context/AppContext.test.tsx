@@ -8,12 +8,13 @@ import type { UserTeam } from '../types/app';
 
 // Test component to interact with context
 function TestComponent() {
-  const { state, setUser, setWeek, setLoading, setError, toggleTeam, dispatch } = useAppContext();
+  const { state, setUser, setWeek, setLoading, setError, toggleTeam, setActiveTab, dispatch } = useAppContext();
 
   return (
     <div>
       <div data-testid="user">{state.user?.username || 'No user'}</div>
       <div data-testid="week">{state.selectedWeek}</div>
+      <div data-testid="active-tab">{state.activeTab}</div>
       <div data-testid="loading">{state.loading ? 'Loading' : 'Not loading'}</div>
       <div data-testid="error">{state.error || 'No error'}</div>
       <div data-testid="teams-count">{state.userTeams.length}</div>
@@ -30,6 +31,13 @@ function TestComponent() {
         onClick={() => setWeek(5)}
       >
         Set Week 5
+      </button>
+      
+      <button
+        data-testid="set-active-tab"
+        onClick={() => setActiveTab('exposure')}
+      >
+        Set Exposure Tab
       </button>
       
       <button
@@ -88,6 +96,7 @@ describe('AppContext', () => {
 
     expect(screen.getByTestId('user')).toHaveTextContent('No user');
     expect(screen.getByTestId('week')).toHaveTextContent('1');
+    expect(screen.getByTestId('active-tab')).toHaveTextContent('gameday');
     expect(screen.getByTestId('loading')).toHaveTextContent('Not loading');
     expect(screen.getByTestId('error')).toHaveTextContent('No error');
     expect(screen.getByTestId('teams-count')).toHaveTextContent('0');
@@ -147,6 +156,23 @@ describe('AppContext', () => {
     });
 
     expect(screen.getByTestId('error')).toHaveTextContent('Test error');
+  });
+
+  it('should update active tab state', () => {
+    render(
+      <AppProvider>
+        <TestComponent />
+      </AppProvider>
+    );
+
+    // Initial state should be 'gameday'
+    expect(screen.getByTestId('active-tab')).toHaveTextContent('gameday');
+
+    act(() => {
+      screen.getByTestId('set-active-tab').click();
+    });
+
+    expect(screen.getByTestId('active-tab')).toHaveTextContent('exposure');
   });
 
   it('should persist selected week to localStorage', () => {

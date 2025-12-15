@@ -36,6 +36,7 @@ export interface AppState {
   selectedWeek: number;
   userTeams: UserTeam[];
   gamedayData: GamedayData | null;
+  activeTab: 'gameday' | 'exposure';
   loading: boolean;
   error: string | null;
   popupData: {
@@ -54,6 +55,7 @@ export type AppAction =
   | { type: 'SELECT_ALL_TEAMS' }
   | { type: 'DESELECT_ALL_TEAMS' }
   | { type: 'SET_GAMEDAY_DATA'; payload: GamedayData }
+  | { type: 'SET_ACTIVE_TAB'; payload: 'gameday' | 'exposure' }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string }
   | { type: 'CLEAR_ERROR' }
