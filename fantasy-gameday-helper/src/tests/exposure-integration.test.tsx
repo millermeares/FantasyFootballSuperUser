@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, act, fireEvent } from '@testing-library/react';
 import { TabNavigation } from '../components/ui/TabNavigation';
 import { ExposureView } from '../views/ExposureView';
 import { AppProvider } from '../context';
@@ -52,132 +51,132 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-// Test data for exposure feature testing
-const mockUser = {
-  user_id: 'test_user_123',
-  username: 'testuser',
-  display_name: 'Test User',
-};
+// Test data for exposure feature testing (commented out unused data)
+// const mockUser = {
+//   user_id: 'test_user_123',
+//   username: 'testuser',
+//   display_name: 'Test User',
+// };
 
-const mockLeagues = [
-  {
-    league_id: 'league_1',
-    name: 'Test League 1',
-    season: '2024',
-    status: 'in_season' as const,
-    sport: 'nfl' as const,
-    settings: {},
-    total_rosters: 10,
-  },
-  {
-    league_id: 'league_2', 
-    name: 'Test League 2',
-    season: '2024',
-    status: 'in_season' as const,
-    sport: 'nfl' as const,
-    settings: {},
-    total_rosters: 12,
-  },
-];
+// const mockLeagues = [
+//   {
+//     league_id: 'league_1',
+//     name: 'Test League 1',
+//     season: '2024',
+//     status: 'in_season' as const,
+//     sport: 'nfl' as const,
+//     settings: {},
+//     total_rosters: 10,
+//   },
+//   {
+//     league_id: 'league_2', 
+//     name: 'Test League 2',
+//     season: '2024',
+//     status: 'in_season' as const,
+//     sport: 'nfl' as const,
+//     settings: {},
+//     total_rosters: 12,
+//   },
+// ];
 
 // Mock rosters with comprehensive player data for exposure testing
 // Need to return different rosters for different leagues
-const mockRostersLeague1 = [
-  // User's roster in league 1
-  {
-    roster_id: 1,
-    owner_id: 'test_user_123',
-    players: ['player_1', 'player_2', 'player_3', 'player_4'], // All roster positions
-    starters: ['player_1', 'player_2'], // Only starters
-  },
-  // Other user's roster in league 1
-  {
-    roster_id: 2,
-    owner_id: 'other_user_1',
-    players: ['player_7', 'player_8'],
-    starters: ['player_7'],
-  },
-];
+// const mockRostersLeague1 = [
+//   // User's roster in league 1
+//   {
+//     roster_id: 1,
+//     owner_id: 'test_user_123',
+//     players: ['player_1', 'player_2', 'player_3', 'player_4'], // All roster positions
+//     starters: ['player_1', 'player_2'], // Only starters
+//   },
+//   // Other user's roster in league 1
+//   {
+//     roster_id: 2,
+//     owner_id: 'other_user_1',
+//     players: ['player_7', 'player_8'],
+//     starters: ['player_7'],
+//   },
+// ];
 
-const mockRostersLeague2 = [
-  // User's roster in league 2  
-  {
-    roster_id: 3,
-    owner_id: 'test_user_123',
-    players: ['player_1', 'player_5', 'player_6'], // Overlapping player_1
-    starters: ['player_1', 'player_5'],
-  },
-  // Other user's roster in league 2
-  {
-    roster_id: 4,
-    owner_id: 'other_user_2',
-    players: ['player_9', 'player_10'],
-    starters: ['player_9'],
-  },
-];
+// const mockRostersLeague2 = [
+//   // User's roster in league 2  
+//   {
+//     roster_id: 3,
+//     owner_id: 'test_user_123',
+//     players: ['player_1', 'player_5', 'player_6'], // Overlapping player_1
+//     starters: ['player_1', 'player_5'],
+//   },
+//   // Other user's roster in league 2
+//   {
+//     roster_id: 4,
+//     owner_id: 'other_user_2',
+//     players: ['player_9', 'player_10'],
+//     starters: ['player_9'],
+//   },
+// ];
 
-const mockMatchupsLeague1 = [
-  {
-    roster_id: 1,
-    matchup_id: 1,
-    starters: ['player_1', 'player_2'],
-    players: ['player_1', 'player_2', 'player_3', 'player_4'],
-    points: 100,
-    custom_points: null,
-  },
-  {
-    roster_id: 2,
-    matchup_id: 1,
-    starters: ['player_7'],
-    players: ['player_7', 'player_8'],
-    points: 95,
-    custom_points: null,
-  },
-];
+// const mockMatchupsLeague1 = [
+//   {
+//     roster_id: 1,
+//     matchup_id: 1,
+//     starters: ['player_1', 'player_2'],
+//     players: ['player_1', 'player_2', 'player_3', 'player_4'],
+//     points: 100,
+//     custom_points: null,
+//   },
+//   {
+//     roster_id: 2,
+//     matchup_id: 1,
+//     starters: ['player_7'],
+//     players: ['player_7', 'player_8'],
+//     points: 95,
+//     custom_points: null,
+//   },
+// ];
 
-const mockMatchupsLeague2 = [
-  {
-    roster_id: 3,
-    matchup_id: 2,
-    starters: ['player_1', 'player_5'],
-    players: ['player_1', 'player_5', 'player_6'],
-    points: 110,
-    custom_points: null,
-  },
-  {
-    roster_id: 4,
-    matchup_id: 2,
-    starters: ['player_9'],
-    players: ['player_9', 'player_10'],
-    points: 88,
-    custom_points: null,
-  },
-];
+// const mockMatchupsLeague2 = [
+//   {
+//     roster_id: 3,
+//     matchup_id: 2,
+//     starters: ['player_1', 'player_5'],
+//     players: ['player_1', 'player_5', 'player_6'],
+//     points: 110,
+//     custom_points: null,
+//   },
+//   {
+//     roster_id: 4,
+//     matchup_id: 2,
+//     starters: ['player_9'],
+//     players: ['player_9', 'player_10'],
+//     points: 88,
+//     custom_points: null,
+//   },
+// ];
 
 // Helper function to wait for teams to load and tabs to appear
-const waitForTeamsAndTabs = async () => {
-  // Wait for teams to be loaded (team filter should appear)
-  await waitFor(() => {
-    // Look for any indication that teams have loaded
-    const teamElements = screen.queryAllByText(/test league/i);
-    if (teamElements.length === 0) {
-      // If no team elements, check if there's an error or empty state
-      const errorElement = screen.queryByText(/no teams found/i);
-      const emptyElement = screen.queryByText(/no leagues found/i);
-      if (errorElement || emptyElement) {
-        throw new Error('Teams failed to load');
-      }
-      throw new Error('Teams not loaded yet');
-    }
-    return true;
-  }, { timeout: 10000 });
+// const waitForTeamsAndTabs = async () => {
+//   // Wait for teams to be loaded (team filter should appear)
+//   await waitFor(() => {
+//     // Look for any indication that teams have loaded
+//     const teamElements = screen.queryAllByText(/test league/i);
+//     if (teamElements.length === 0) {
+//       // If no team elements, check if there's an error or empty state
+//       const errorElement = screen.queryByText(/no teams found/i);
+//       const emptyElement = screen.queryByText(/no leagues found/i);
+//       if (errorElement || emptyElement) {
+//         throw new Error('Teams failed to load');
+//       }
+//       throw new Error('Teams not loaded yet');
+//     }
+//     return true;
+//   }, { timeout: 10000 });
   
-  // Wait for tabs to appear
-  await waitFor(() => {
-    expect(screen.getByRole('tab', { name: /gameday/i })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /exposure/i })).toBeInTheDocument();
-  }, { timeout: 5000 });
-};
+//   // Wait for tabs to appear
+//   await waitFor(() => {
+//     expect(screen.getByRole('tab', { name: /gameday/i })).toBeInTheDocument();
+//     expect(screen.getByRole('tab', { name: /exposure/i })).toBeInTheDocument();
+//   }, { timeout: 5000 });
+// };
 
 describe('Exposure Feature Integration Tests', () => {
   beforeEach(() => {
@@ -378,7 +377,7 @@ describe('Exposure Feature Integration Tests', () => {
       );
 
       const gamedayTab = screen.getByRole('tab', { name: /gameday/i });
-      const exposureTab = screen.getByRole('tab', { name: /exposure/i });
+      // const exposureTab = screen.getByRole('tab', { name: /exposure/i });
 
       // Test keyboard navigation with arrow keys
       gamedayTab.focus();
