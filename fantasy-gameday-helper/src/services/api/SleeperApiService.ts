@@ -107,7 +107,7 @@ export class SleeperApiService {
       timeout: this.config.timeout,
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'Fantasy-Gameday-Helper/1.0',
+        // Note: User-Agent header cannot be set in browsers due to security restrictions
       },
     });
 

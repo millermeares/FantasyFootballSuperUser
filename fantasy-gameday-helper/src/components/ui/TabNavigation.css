@@ -95,41 +95,37 @@
   font-size: 0.9rem;
 }
 
-/* Mobile layout - tabs at bottom */
+/* Mobile layout - tabs at top (same as desktop) */
 @media (max-width: 768px) {
   .tab-navigation {
-    flex-direction: column-reverse; /* Reverse order for mobile */
+    flex-direction: column; /* Normal order for mobile - tabs at top */
     height: 100vh; /* Full viewport height on mobile */
   }
   
   .tab-buttons {
-    order: 2; /* Tabs at bottom on mobile */
-    border-bottom: none;
-    border-top: 2px solid #e0e0e0;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
+    order: 1; /* Tabs at top on mobile */
+    border-bottom: 2px solid #e0e0e0;
+    border-top: none;
+    position: relative; /* Use relative positioning instead of fixed */
     background-color: #f8f9fa;
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-    /* Safe area support for devices with home indicators */
-    padding-bottom: max(0px, env(safe-area-inset-bottom));
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    /* Safe area support for devices with notches */
+    padding-top: max(0px, env(safe-area-inset-top));
   }
   
   .tab-content {
-    order: 1; /* Content at top on mobile */
-    padding: 0.75rem 0.75rem calc(80px + env(safe-area-inset-bottom)) 0.75rem; /* Add bottom padding for fixed tabs */
+    order: 2; /* Content below tabs on mobile */
+    padding: 0.75rem; /* Remove bottom padding since tabs aren't fixed */
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    height: calc(100vh - 80px - env(safe-area-inset-bottom)); /* Account for tab height */
+    flex: 1; /* Take remaining space */
   }
   
   .tab-button {
     padding: 1rem 0.75rem;
     font-size: 0.9rem;
-    border-bottom: none;
-    border-top: 3px solid transparent;
+    border-bottom: 3px solid transparent; /* Use bottom border like desktop */
+    border-top: none;
     min-height: 64px; /* Larger touch-friendly height */
     min-width: 44px; /* Minimum touch target width */
     font-weight: 500;
@@ -138,8 +134,8 @@
   }
   
   .tab-button.active {
-    border-bottom: none;
-    border-top-color: #007bff;
+    border-bottom-color: #007bff; /* Use bottom border like desktop */
+    border-top: none;
     background-color: #fff;
     font-weight: 600;
   }
@@ -178,8 +174,7 @@
   }
   
   .tab-content {
-    padding: 0.5rem 0.5rem calc(76px + env(safe-area-inset-bottom)) 0.5rem;
-    height: calc(100vh - 76px - env(safe-area-inset-bottom));
+    padding: 0.5rem; /* Simplified padding since tabs aren't fixed */
   }
   
   .placeholder-content {
@@ -249,13 +244,12 @@
 /* Landscape orientation on mobile */
 @media (max-width: 768px) and (orientation: landscape) {
   .tab-buttons {
-    position: relative; /* Use relative positioning in landscape */
-    box-shadow: none;
+    /* Already using relative positioning */
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); /* Lighter shadow in landscape */
   }
   
   .tab-content {
-    padding: 0.5rem 0.75rem 0.5rem 0.75rem; /* Remove bottom padding in landscape */
-    height: auto; /* Auto height in landscape */
+    padding: 0.5rem 0.75rem; /* Consistent padding in landscape */
   }
   
   .tab-button {
@@ -331,8 +325,8 @@
   
   @media (max-width: 768px) {
     .tab-button.active {
-      border-top-color: #63b3ed;
-      border-bottom-color: transparent;
+      border-bottom-color: #63b3ed; /* Use bottom border like desktop */
+      border-top-color: transparent;
     }
   }
   
@@ -382,10 +376,10 @@
 
 /* Better visual separation on mobile */
 @media (max-width: 768px) {
-  .tab-buttons::before {
+  .tab-buttons::after {
     content: '';
     position: absolute;
-    top: -1px;
+    bottom: -1px;
     left: 0;
     right: 0;
     height: 1px;

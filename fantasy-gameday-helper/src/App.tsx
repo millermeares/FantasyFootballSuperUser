@@ -103,12 +103,22 @@ function App() {
       for (const league of leagues) {
         try {
           // Get rosters to find user's team
-          const rosters = await sleeperApi.getLeagueRosters(league.league_id);
-          rostersMap.set(league.league_id, rosters);
+          const allRosters = await sleeperApi.getLeagueRosters(league.league_id);
+          
+          // Filter out invalid rosters (those with null players array)
+          const validRosters = allRosters.filter(roster => 
+            roster && roster.players && Array.isArray(roster.players)
+          );
+          
+          if (validRosters.length < allRosters.length) {
+            console.warn(`Filtered out ${allRosters.length - validRosters.length} invalid rosters in ${league.name}`);
+          }
+          
+          rostersMap.set(league.league_id, validRosters);
 
           // Find user's roster in this league
-          const userRoster = rosters.find(roster => roster.owner_id === userId);
-          if (userRoster) {
+          const userRoster = validRosters.find(roster => roster.owner_id === userId);
+          if (userRoster && userRoster.players && Array.isArray(userRoster.players)) {
             console.log(`Found user roster in ${league.name}: roster_id ${userRoster.roster_id}`);
             
             userTeams.push({
@@ -170,7 +180,7 @@ function App() {
         const exposureData = playerAnalysisService.calculateExposureReport(analysisInput);
         setExposureData(exposureData);
       } else {
-        setError('No teams found for this user in any leagues');
+        setError('No valid teams found for this user. This may be because leagues are in pre-draft status or rosters haven\'t been set up yet.');
       }
 
     } catch (error) {
@@ -293,7 +303,7 @@ function App() {
       }, 300);
       return () => clearTimeout(timeoutId);
     }
-  }, [state.userTeams, rawData, recalculateGamedayData]);
+  }, [state.userTeams, rawData]); // Removed recalculateGamedayData from dependencies
 
   return (
     <div className="app">

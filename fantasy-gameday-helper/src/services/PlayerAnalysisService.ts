@@ -95,31 +95,14 @@ export class PlayerAnalysisService {
       // Find the user's matchup for this team
       const userMatchup = leagueMatchups.find(m => m.roster_id === team.rosterId);
       
-      // DEBUG: Log matchup data
-      console.log(`=== DEBUG USER MATCHUP - ${league.name} ===`);
-      console.log('Team roster ID:', team.rosterId);
-      console.log('Available matchups:', leagueMatchups.map(m => ({ roster_id: m.roster_id, matchup_id: m.matchup_id })));
-      console.log('Found user matchup:', userMatchup);
-      
       if (!userMatchup || !userMatchup.starters) {
         console.warn(`No matchup or starters found for team ${team.leagueName}, roster ID ${team.rosterId}`);
         continue;
       }
 
-      console.log('User starters:', userMatchup.starters);
-      
-      // Also check the roster data for comparison
-      const userRoster = leagueRosters.find(r => r.roster_id === team.rosterId);
-      if (userRoster) {
-        console.log('Roster starters (for comparison):', userRoster.starters);
-        console.log('Roster players:', userRoster.players);
-      }
-
       // Count each starter
       for (const playerId of userMatchup.starters) {
         if (!playerId) continue; // Skip null/undefined players
-
-        console.log(`Adding starter: ${playerId}`);
 
         const existing = playerCounts.get(playerId);
         if (existing) {
@@ -137,7 +120,6 @@ export class PlayerAnalysisService {
       }
     }
 
-    console.log('Final user player counts:', Array.from(playerCounts.entries()));
     return playerCounts;
   }
 
@@ -171,23 +153,14 @@ export class PlayerAnalysisService {
         m.roster_id !== userMatchup.roster_id
       );
 
-      console.log(`=== DEBUG OPPONENT MATCHUP - ${league.name} ===`);
-      console.log('User matchup ID:', userMatchup.matchup_id);
-      console.log('User roster ID:', userMatchup.roster_id);
-      console.log('Found opponent matchup:', opponentMatchup);
-
       if (!opponentMatchup || !opponentMatchup.starters) {
         console.warn(`No opponent matchup or starters found for ${league.name}`);
         continue;
       }
 
-      console.log('Opponent starters:', opponentMatchup.starters);
-
       // Count each opponent starter
       for (const playerId of opponentMatchup.starters) {
         if (!playerId) continue; // Skip null/undefined players
-
-        console.log(`Adding opponent starter: ${playerId}`);
 
         const existing = playerCounts.get(playerId);
         if (existing) {
@@ -205,7 +178,6 @@ export class PlayerAnalysisService {
       }
     }
 
-    console.log('Final opponent player counts:', Array.from(playerCounts.entries()));
     return playerCounts;
   }
 
@@ -272,6 +244,10 @@ export class PlayerAnalysisService {
   public getAllRosterPlayers(roster: import('../types/sleeper').SleeperRoster): string[] {
     // The roster.players array contains ALL players (starters, bench, taxi, IR)
     // Filter out null/undefined values
+    if (!roster || !roster.players) {
+      console.warn('Invalid roster data:', roster);
+      return [];
+    }
     return roster.players.filter(playerId => playerId != null);
   }
 
@@ -322,6 +298,11 @@ export class PlayerAnalysisService {
 
       // Get all players from this roster (including bench, taxi, IR)
       const allPlayers = this.getAllRosterPlayers(userRoster);
+      
+      if (!allPlayers || allPlayers.length === 0) {
+        console.warn(`No players found for team ${team.leagueName}, roster ID ${team.rosterId}`);
+        continue;
+      }
 
       // Count each player
       for (const playerId of allPlayers) {
