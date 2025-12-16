@@ -149,11 +149,11 @@ export async function examplePlayerAnalysis() {
   console.log('1. Validating input data...');
   const validationErrors = analysisService.validateInput(exampleInput);
   if (validationErrors.length > 0) {
-    console.log('❌ Validation errors found:');
+    console.log('Validation errors found:');
     validationErrors.forEach(error => console.log(`   - ${error}`));
     return;
   }
-  console.log('✅ Input data is valid\n');
+  console.log('Input data is valid\n');
 
   // Perform the analysis
   console.log('2. Analyzing player data...');
@@ -162,7 +162,7 @@ export async function examplePlayerAnalysis() {
   // Display results
   console.log('3. Analysis Results:\n');
 
-  console.log('📈 PLAYERS TO CHEER FOR:');
+  console.log('PLAYERS TO CHEER FOR:');
   if (gamedayData.cheeringFor.length === 0) {
     console.log('   No players found in selected team lineups');
   } else {
@@ -172,7 +172,7 @@ export async function examplePlayerAnalysis() {
     });
   }
 
-  console.log('\n📉 PLAYERS TO CHEER AGAINST:');
+  console.log('\nPLAYERS TO CHEER AGAINST:');
   if (gamedayData.cheeringAgainst.length === 0) {
     console.log('   No opponent players found');
   } else {
@@ -185,9 +185,9 @@ export async function examplePlayerAnalysis() {
   // Show statistics
   console.log('\n4. Analysis Statistics:');
   const stats = analysisService.getAnalysisStats(gamedayData);
-  console.log(`   📊 Total players to cheer for: ${stats.totalCheeringFor}`);
-  console.log(`   📊 Total players to cheer against: ${stats.totalCheeringAgainst}`);
-  console.log(`   📊 Selected teams: ${stats.selectedTeams} of ${stats.totalTeams}`);
+  console.log(`   Total players to cheer for: ${stats.totalCheeringFor}`);
+  console.log(`   Total players to cheer against: ${stats.totalCheeringAgainst}`);
+  console.log(`   Selected teams: ${stats.selectedTeams} of ${stats.totalTeams}`);
 
   // Demonstrate conflict resolution
   console.log('\n5. Conflict Resolution Example:');
@@ -247,7 +247,7 @@ export function exampleErrorHandling() {
 
   const errors = analysisService.validateInput(invalidInput);
   console.log('Validation errors for invalid input:');
-  errors.forEach(error => console.log(`  ❌ ${error}`));
+  errors.forEach(error => console.log(`  ${error}`));
 
   // Example of missing data
   const incompleteInput: AnalysisInput = {
@@ -277,7 +277,7 @@ export function exampleErrorHandling() {
 
   const incompleteErrors = analysisService.validateInput(incompleteInput);
   console.log('\nValidation errors for incomplete data:');
-  incompleteErrors.forEach(error => console.log(`  ❌ ${error}`));
+  incompleteErrors.forEach(error => console.log(`  ${error}`));
 }
 
 // Run examples if this file is executed directly

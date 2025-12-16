@@ -23,7 +23,7 @@ const requiredPackageScripts = [
   'preview'
 ];
 
-console.log('🔍 Verifying deployment readiness...\n');
+console.log('Verifying deployment readiness...\n');
 
 let allGood = true;
 
@@ -31,7 +31,7 @@ let allGood = true;
 console.log('📁 Checking required files:');
 requiredFiles.forEach(file => {
   const exists = existsSync(file);
-  console.log(`  ${exists ? '✅' : '❌'} ${file}`);
+  console.log(`  ${exists ? '[PASS]' : '[FAIL]'} ${file}`);
   if (!exists) allGood = false;
 });
 
@@ -41,18 +41,18 @@ try {
   const packageJson = JSON.parse(readFileSync('package.json', 'utf8'));
   requiredPackageScripts.forEach(script => {
     const exists = packageJson.scripts && packageJson.scripts[script];
-    console.log(`  ${exists ? '✅' : '❌'} npm run ${script}`);
+    console.log(`  ${exists ? '[PASS]' : '[FAIL]'} npm run ${script}`);
     if (!exists) allGood = false;
   });
 } catch (error) {
-  console.log('  ❌ Could not read package.json');
+  console.log('  [FAIL] Could not read package.json');
   allGood = false;
 }
 
 // Check build output
-console.log('\n🏗️  Checking build output:');
+console.log('\nChecking build output:');
 const buildExists = existsSync('dist');
-console.log(`  ${buildExists ? '✅' : '❌'} dist/ directory exists`);
+console.log(`  ${buildExists ? '[PASS]' : '[FAIL]'} dist/ directory exists`);
 if (!buildExists) allGood = false;
 
 // Check HTTPS in API calls
@@ -60,22 +60,22 @@ console.log('\n🔒 Checking HTTPS usage:');
 try {
   const apiServiceContent = readFileSync('src/services/api/SleeperApiService.ts', 'utf8');
   const usesHttps = apiServiceContent.includes('https://api.sleeper.app');
-  console.log(`  ${usesHttps ? '✅' : '❌'} Sleeper API uses HTTPS`);
+  console.log(`  ${usesHttps ? '[PASS]' : '[FAIL]'} Sleeper API uses HTTPS`);
   if (!usesHttps) allGood = false;
 } catch (error) {
-  console.log('  ❌ Could not verify API service HTTPS usage');
+  console.log('  [FAIL] Could not verify API service HTTPS usage');
   allGood = false;
 }
 
 // Summary
 console.log('\n' + '='.repeat(50));
 if (allGood) {
-  console.log('🎉 All checks passed! Ready for AWS Amplify deployment.');
+  console.log('All checks passed! Ready for AWS Amplify deployment.');
   console.log('\nNext steps:');
   console.log('1. Push your code to GitHub');
   console.log('2. Connect repository to AWS Amplify');
   console.log('3. Deploy and test');
 } else {
-  console.log('❌ Some checks failed. Please fix the issues above.');
+  console.log('Some checks failed. Please fix the issues above.');
   process.exit(1);
 }
