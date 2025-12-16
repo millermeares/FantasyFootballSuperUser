@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react';
-import type { PlayerAllegiance } from '../../types/app';
+import type { PlayerAllegiance, PlayerExposure } from '../../types/app';
 import './LeagueInfoPopup.css';
 
 interface LeagueInfoPopupProps {
   isOpen: boolean;
-  player: PlayerAllegiance | null;
+  player: PlayerAllegiance | PlayerExposure | null;
   leagues: string[];
   onClose: () => void;
 }
@@ -127,8 +127,15 @@ export function LeagueInfoPopup({
               <span className="player-info-value team-name">{player.team}</span>
             </div>
             <div className="player-info-row">
-              <span className="player-info-label">Total Appearances:</span>
-              <span className="player-info-value count-badge">{player.count}</span>
+              <span className="player-info-label">
+                {'exposurePercentage' in player ? 'Exposure:' : 'Total Appearances:'}
+              </span>
+              <span className="player-info-value count-badge">
+                {'exposurePercentage' in player 
+                  ? `${player.exposurePercentage.toFixed(1)}% (${player.teamCount}/${player.totalTeams} teams)`
+                  : player.count
+                }
+              </span>
             </div>
           </div>
 

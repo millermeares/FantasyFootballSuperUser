@@ -161,3 +161,125 @@
 
 - [ ] 18. Final Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
+
+## Phase 2: Layout Refactoring and Tab Structure
+
+- [x] 19. Update AppContext for tab state management
+  - Add activeTab to global state (start with just 'gameday' | 'exposure')
+  - Implement SET_ACTIVE_TAB action
+  - Keep existing state structure intact for now
+  - _Requirements: 12.6_
+
+- [ ]* 19.1 Write property test for state preservation during tab switching
+  - **Property 20: State preservation during tab switching**
+  - **Validates: Requirements 12.6**
+
+- [x] 20. Create TabNavigation component
+  - Build responsive tab component with Gameday and Exposure tabs
+  - Implement adaptive positioning (top for desktop, bottom for mobile)
+  - Add tab switching functionality with state management
+  - Create placeholder content areas for each tab
+  - _Requirements: 12.1, 12.4, 12.5_
+
+- [ ]* 20.1 Write property test for responsive tab positioning
+  - **Property 19: Responsive tab positioning**
+  - **Validates: Requirements 12.4, 12.5**
+
+- [x] 21. Add responsive design for tabbed interface
+  - Implement CSS for adaptive tab positioning
+  - Ensure mobile-friendly touch targets for bottom tabs
+  - Test tab interface across different screen sizes
+  - _Requirements: 12.4, 12.5_
+
+- [x] 22. Create GamedayView component
+  - Refactor existing gameday functionality into dedicated view component
+  - Move cheering for/against tables into GamedayView container
+  - Maintain existing gameday logic and state management
+  - Ensure no functionality is lost in the refactor
+  - _Requirements: 12.2_
+
+- [x] 23. Update App component for tabbed interface
+  - Integrate TabNavigation component into main app layout
+  - Add conditional rendering based on active tab
+  - Wire up GamedayView to display when Gameday tab is active
+  - Create placeholder ExposureView for Exposure tab
+  - _Requirements: 12.1, 12.2, 12.3_
+
+- [ ]* 23.1 Write property test for tab navigation
+  - **Property 18: Tab navigation functionality**
+  - **Validates: Requirements 12.2, 12.3**
+
+- [x] 24. Layout refactoring checkpoint
+  - Ensure all existing gameday functionality works within new tabbed layout
+  - Verify tab switching preserves all state correctly
+  - Test responsive behavior on different device sizes
+  - _Requirements: 12.1, 12.2, 12.6_
+
+## Phase 3: Exposure Feature Implementation
+
+- [x] 25. Extend PlayerAnalysisService for exposure calculations
+  - Add getAllRosterPlayers method to extract all players from rosters (not just starters)
+  - Implement calculateExposureReport method to calculate ownership percentages
+  - Add getPlayerExposurePercentage helper method for individual player calculations
+  - _Requirements: 11.1, 11.2_
+
+- [ ]* 25.1 Write property test for complete roster inclusion
+  - **Property 13: Complete roster inclusion for exposure**
+  - **Validates: Requirements 11.1**
+
+- [ ]* 25.2 Write property test for exposure percentage calculation
+  - **Property 14: Exposure percentage calculation accuracy**
+  - **Validates: Requirements 11.2**
+
+- [x] 26. Update AppContext for exposure data
+  - Add exposureData to global state
+  - Implement SET_EXPOSURE_DATA action
+  - Update popup data interface to support both allegiance and exposure players
+  - _Requirements: 11.5_
+
+- [x] 27. Update PlayerTable component for dual display modes
+  - Add displayMode prop to support both count and percentage display
+  - Modify table headers and formatting based on display mode
+  - Ensure existing gameday functionality remains unchanged
+  - _Requirements: 11.3, 11.4_
+
+- [x] 28. Create ExposureTable component
+  - Build specialized table for displaying ownership percentages
+  - Implement sorting by exposure percentage in descending order
+  - Add clickable percentages for league info popups
+  - Make responsive for mobile viewing
+  - _Requirements: 11.2, 11.3, 11.4_
+
+- [ ]* 28.1 Write property test for exposure table sorting
+  - **Property 15: Exposure table sorting consistency**
+  - **Validates: Requirements 11.3**
+
+- [ ]* 28.2 Write property test for exposure popup functionality
+  - **Property 16: Exposure popup accuracy**
+  - **Validates: Requirements 11.4**
+
+- [x] 29. Create ExposureView component
+  - Build container component for exposure report functionality
+  - Integrate with exposure analysis service
+  - Handle loading states and error conditions for exposure data
+  - Replace placeholder ExposureView in App component
+  - _Requirements: 11.1, 11.5_
+
+- [x] 30. Implement reactive exposure updates
+  - Connect exposure calculations to team selection changes
+  - Ensure exposure table updates immediately when teams are toggled
+  - Add loading states for exposure recalculations
+  - _Requirements: 11.5_
+
+- [ ]* 30.1 Write property test for exposure reactive updates
+  - **Property 17: Exposure reactive updates**
+  - **Validates: Requirements 11.5**
+
+- [x] 31. Integration testing for exposure feature
+  - Test complete exposure workflow from team selection to display
+  - Verify all tab functionality works correctly with exposure data
+  - Test responsive behavior on different device sizes
+  - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 12.1, 12.2, 12.3, 12.4, 12.5, 12.6_
+
+- [x] 32. Final Checkpoint - Ensure all tests pass
+  - Ensure all tests pass, ask the user if questions arise.

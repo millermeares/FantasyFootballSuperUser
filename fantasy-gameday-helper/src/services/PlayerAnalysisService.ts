@@ -3,7 +3,9 @@ import type {
   UserTeam, 
   PlayerAllegiance, 
   GamedayData,
-  AnalysisInput 
+  AnalysisInput,
+  PlayerExposure,
+  ExposureData
 } from '../types/app';
 import { PlayerService } from './PlayerService';
 
@@ -259,6 +261,167 @@ export class PlayerAnalysisService {
       // Secondary sort: player name (ascending) for consistent ordering
       return a.playerName.localeCompare(b.playerName);
     });
+  }
+
+  /**
+   * Extract all players from a roster (including starters, bench, taxi, IR)
+   * Requirements: 11.1
+   * @param roster - The roster to extract players from
+   * @returns Array of all player IDs in the roster
+   */
+  public getAllRosterPlayers(roster: import('../types/sleeper').SleeperRoster): string[] {
+    // The roster.players array contains ALL players (starters, bench, taxi, IR)
+    // Filter out null/undefined values
+    return roster.players.filter(playerId => playerId != null);
+  }
+
+  /**
+   * Calculate exposure report showing ownership percentages across selected teams
+   * Requirements: 11.1, 11.2
+   * @param input - All necessary data for analysis
+   * @returns ExposureData with ownership percentages
+   */
+  public calculateExposureReport(input: AnalysisInput): ExposureData {
+    // Filter to only selected teams
+    const selectedTeams = input.userTeams.filter(team => team.isSelected);
+    const totalSelectedTeams = selectedTeams.length;
+
+    if (totalSelectedTeams === 0) {
+      return {
+        exposureReport: [],
+        totalSelectedTeams: 0
+      };
+    }
+
+    // Track player appearances across all selected teams
+    const playerExposureMap = new Map<string, {
+      teamCount: number;
+      leagues: string[];
+    }>();
+
+    // Process each selected team
+    for (const team of selectedTeams) {
+      const leagueRosters = input.rosters.get(team.leagueId);
+      const league = input.leagues.find(l => l.league_id === team.leagueId);
+
+      if (!leagueRosters || !league) {
+        console.warn(`Missing data for league ${team.leagueName}:`, {
+          hasRosters: !!leagueRosters,
+          hasLeague: !!league
+        });
+        continue;
+      }
+
+      // Find the user's roster for this team
+      const userRoster = leagueRosters.find(r => r.roster_id === team.rosterId);
+      
+      if (!userRoster) {
+        console.warn(`No roster found for team ${team.leagueName}, roster ID ${team.rosterId}`);
+        continue;
+      }
+
+      // Get all players from this roster (including bench, taxi, IR)
+      const allPlayers = this.getAllRosterPlayers(userRoster);
+
+      // Count each player
+      for (const playerId of allPlayers) {
+        if (!playerId) continue; // Skip null/undefined players
+
+        const existing = playerExposureMap.get(playerId);
+        if (existing) {
+          existing.teamCount++;
+          if (!existing.leagues.includes(league.name)) {
+            existing.leagues.push(league.name);
+          }
+        } else {
+          playerExposureMap.set(playerId, {
+            teamCount: 1,
+            leagues: [league.name]
+          });
+        }
+      }
+    }
+
+    // Convert to PlayerExposure objects and calculate percentages
+    const exposureReport: PlayerExposure[] = [];
+    
+    for (const [playerId, data] of playerExposureMap) {
+      const exposurePercentage = (data.teamCount / totalSelectedTeams) * 100;
+      
+      exposureReport.push({
+        playerId,
+        playerName: this.playerService.getPlayerName(playerId),
+        position: this.playerService.getPlayerPosition(playerId),
+        team: this.playerService.getPlayerTeam(playerId),
+        exposurePercentage,
+        teamCount: data.teamCount,
+        totalTeams: totalSelectedTeams,
+        leagues: [...data.leagues] // Create a copy
+      });
+    }
+
+    // Sort by exposure percentage in descending order
+    exposureReport.sort((a, b) => {
+      // Primary sort: exposure percentage (descending)
+      if (b.exposurePercentage !== a.exposurePercentage) {
+        return b.exposurePercentage - a.exposurePercentage;
+      }
+      
+      // Secondary sort: player name (ascending) for consistent ordering
+      return a.playerName.localeCompare(b.playerName);
+    });
+
+    return {
+      exposureReport,
+      totalSelectedTeams
+    };
+  }
+
+  /**
+   * Get exposure percentage for a specific player across selected teams
+   * Requirements: 11.2
+   * @param playerId - The player ID to calculate exposure for
+   * @param userTeams - Array of user teams
+   * @param rosters - Map of league rosters
+   * @returns Exposure percentage (0-100)
+   */
+  public getPlayerExposurePercentage(
+    playerId: string,
+    userTeams: UserTeam[],
+    rosters: Map<string, import('../types/sleeper').SleeperRoster[]>
+  ): number {
+    const selectedTeams = userTeams.filter(team => team.isSelected);
+    const totalSelectedTeams = selectedTeams.length;
+
+    if (totalSelectedTeams === 0) {
+      return 0;
+    }
+
+    let teamsWithPlayer = 0;
+
+    // Check each selected team for this player
+    for (const team of selectedTeams) {
+      const leagueRosters = rosters.get(team.leagueId);
+      
+      if (!leagueRosters) {
+        continue;
+      }
+
+      // Find the user's roster for this team
+      const userRoster = leagueRosters.find(r => r.roster_id === team.rosterId);
+      
+      if (!userRoster) {
+        continue;
+      }
+
+      // Check if this roster contains the player
+      const allPlayers = this.getAllRosterPlayers(userRoster);
+      if (allPlayers.includes(playerId)) {
+        teamsWithPlayer++;
+      }
+    }
+
+    return (teamsWithPlayer / totalSelectedTeams) * 100;
   }
 
   /**

@@ -845,4 +845,139 @@ describe('PlayerAnalysisService', () => {
       ), { numRuns: 100 });
     });
   });
+
+  describe('Exposure Calculations', () => {
+    it('should extract all roster players including bench', () => {
+      const roster = {
+        roster_id: 1,
+        owner_id: 'user123',
+        players: ['player1', 'player2', 'player3', 'player4', 'player5'],
+        starters: ['player1', 'player2']
+      };
+
+      const allPlayers = service.getAllRosterPlayers(roster);
+      
+      expect(allPlayers).toHaveLength(5);
+      expect(allPlayers).toContain('player1');
+      expect(allPlayers).toContain('player2');
+      expect(allPlayers).toContain('player3'); // bench player
+      expect(allPlayers).toContain('player4'); // bench player
+      expect(allPlayers).toContain('player5'); // bench player
+    });
+
+    it('should calculate exposure percentages correctly', () => {
+      // Create test data with known exposure percentages
+      const testInput = { ...mockInput };
+      
+      // Modify rosters to have known player distributions
+      const testRosters = new Map<string, SleeperRoster[]>();
+      
+      // League 1: player1 in user roster, player2 not in user roster
+      testRosters.set('league1', [
+        {
+          roster_id: 1,
+          owner_id: 'user123',
+          players: ['player1', 'player3', 'player4'], // player1 is here
+          starters: ['player1', 'player3']
+        },
+        {
+          roster_id: 3,
+          owner_id: 'opponent1',
+          players: ['player2', 'player5', 'player6'],
+          starters: ['player2', 'player5']
+        }
+      ]);
+
+      // League 2: player1 in user roster, player2 not in user roster
+      testRosters.set('league2', [
+        {
+          roster_id: 2,
+          owner_id: 'user123',
+          players: ['player1', 'player7', 'player8'], // player1 is here too
+          starters: ['player1', 'player7']
+        },
+        {
+          roster_id: 4,
+          owner_id: 'opponent2',
+          players: ['player9', 'player10', 'player11'],
+          starters: ['player9', 'player10']
+        }
+      ]);
+
+      testInput.rosters = testRosters;
+
+      const exposureData = service.calculateExposureReport(testInput);
+
+      // player1 appears in 2 out of 2 selected teams = 100% exposure
+      const player1Exposure = exposureData.exposureReport.find(p => p.playerId === 'player1');
+      expect(player1Exposure).toBeDefined();
+      expect(player1Exposure?.exposurePercentage).toBe(100);
+      expect(player1Exposure?.teamCount).toBe(2);
+      expect(player1Exposure?.totalTeams).toBe(2);
+
+      // player3 appears in 1 out of 2 selected teams = 50% exposure
+      const player3Exposure = exposureData.exposureReport.find(p => p.playerId === 'player3');
+      expect(player3Exposure).toBeDefined();
+      expect(player3Exposure?.exposurePercentage).toBe(50);
+      expect(player3Exposure?.teamCount).toBe(1);
+      expect(player3Exposure?.totalTeams).toBe(2);
+
+      // Verify sorting by exposure percentage (descending)
+      for (let i = 0; i < exposureData.exposureReport.length - 1; i++) {
+        expect(exposureData.exposureReport[i].exposurePercentage).toBeGreaterThanOrEqual(
+          exposureData.exposureReport[i + 1].exposurePercentage
+        );
+      }
+    });
+
+    it('should calculate individual player exposure percentage', () => {
+      // Create test rosters
+      const testRosters = new Map<string, SleeperRoster[]>();
+      
+      testRosters.set('league1', [
+        {
+          roster_id: 1,
+          owner_id: 'user123',
+          players: ['player1', 'player2'],
+          starters: ['player1']
+        }
+      ]);
+
+      testRosters.set('league2', [
+        {
+          roster_id: 2,
+          owner_id: 'user123',
+          players: ['player1', 'player3'], // player1 appears here too
+          starters: ['player1']
+        }
+      ]);
+
+      const testUserTeams = [
+        { leagueId: 'league1', leagueName: 'League 1', rosterId: 1, isSelected: true },
+        { leagueId: 'league2', leagueName: 'League 2', rosterId: 2, isSelected: true }
+      ];
+
+      // player1 appears in both teams = 100%
+      const player1Exposure = service.getPlayerExposurePercentage('player1', testUserTeams, testRosters);
+      expect(player1Exposure).toBe(100);
+
+      // player2 appears in 1 out of 2 teams = 50%
+      const player2Exposure = service.getPlayerExposurePercentage('player2', testUserTeams, testRosters);
+      expect(player2Exposure).toBe(50);
+
+      // player4 doesn't appear in any team = 0%
+      const player4Exposure = service.getPlayerExposurePercentage('player4', testUserTeams, testRosters);
+      expect(player4Exposure).toBe(0);
+    });
+
+    it('should handle empty exposure data correctly', () => {
+      const emptyInput = { ...mockInput };
+      emptyInput.userTeams = mockInput.userTeams.map(team => ({ ...team, isSelected: false }));
+
+      const exposureData = service.calculateExposureReport(emptyInput);
+
+      expect(exposureData.exposureReport).toHaveLength(0);
+      expect(exposureData.totalSelectedTeams).toBe(0);
+    });
+  });
 });

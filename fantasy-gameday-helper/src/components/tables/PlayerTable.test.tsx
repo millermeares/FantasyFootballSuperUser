@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { PlayerTable } from './PlayerTable';
-import type { PlayerAllegiance } from '../../types/app';
+import type { PlayerAllegiance, PlayerExposure } from '../../types/app';
 
 // Mock data for testing
 const mockPlayers: PlayerAllegiance[] = [
@@ -27,6 +27,39 @@ const mockPlayers: PlayerAllegiance[] = [
     position: 'WR',
     team: 'MIA',
     count: 1,
+    leagues: ['League C']
+  }
+];
+
+const mockExposurePlayers: PlayerExposure[] = [
+  {
+    playerId: '1',
+    playerName: 'Josh Allen',
+    position: 'QB',
+    team: 'BUF',
+    exposurePercentage: 75.0,
+    teamCount: 3,
+    totalTeams: 4,
+    leagues: ['League A', 'League B', 'League C']
+  },
+  {
+    playerId: '2',
+    playerName: 'Christian McCaffrey',
+    position: 'RB',
+    team: 'SF',
+    exposurePercentage: 50.0,
+    teamCount: 2,
+    totalTeams: 4,
+    leagues: ['League A', 'League B']
+  },
+  {
+    playerId: '3',
+    playerName: 'Tyreek Hill',
+    position: 'WR',
+    team: 'MIA',
+    exposurePercentage: 25.0,
+    teamCount: 1,
+    totalTeams: 4,
     leagues: ['League C']
   }
 ];
@@ -268,5 +301,144 @@ describe('PlayerTable', () => {
     );
 
     expect(screen.getByText('1 player')).toBeInTheDocument();
+  });
+
+  describe('Percentage Display Mode', () => {
+    it('renders table with exposure percentages', () => {
+      render(
+        <PlayerTable
+          players={mockExposurePlayers}
+          title="Exposure Report"
+          displayMode="percentage"
+        />
+      );
+
+      expect(screen.getByText('Exposure Report')).toBeInTheDocument();
+      expect(screen.getByText('Josh Allen')).toBeInTheDocument();
+      expect(screen.getByText('75.0%')).toBeInTheDocument();
+      expect(screen.getByText('50.0%')).toBeInTheDocument();
+      expect(screen.getByText('25.0%')).toBeInTheDocument();
+    });
+
+    it('displays Exposure header in percentage mode', () => {
+      render(
+        <PlayerTable
+          players={mockExposurePlayers}
+          title="Exposure Report"
+          displayMode="percentage"
+        />
+      );
+
+      expect(screen.getByRole('columnheader', { name: /exposure/i })).toBeInTheDocument();
+      expect(screen.queryByRole('columnheader', { name: /count/i })).not.toBeInTheDocument();
+    });
+
+    it('sorts by exposure percentage by default in percentage mode', () => {
+      render(
+        <PlayerTable
+          players={mockExposurePlayers}
+          title="Exposure Report"
+          displayMode="percentage"
+        />
+      );
+
+      const playerRows = screen.getAllByRole('row');
+      // Skip header row (index 0)
+      const firstPlayerRow = playerRows[1];
+      const secondPlayerRow = playerRows[2];
+      const thirdPlayerRow = playerRows[3];
+
+      expect(firstPlayerRow).toHaveTextContent('Josh Allen'); // 75%
+      expect(secondPlayerRow).toHaveTextContent('Christian McCaffrey'); // 50%
+      expect(thirdPlayerRow).toHaveTextContent('Tyreek Hill'); // 25%
+    });
+
+    it('handles sorting by exposure percentage', () => {
+      render(
+        <PlayerTable
+          players={mockExposurePlayers}
+          title="Exposure Report"
+          displayMode="percentage"
+        />
+      );
+
+      const exposureHeader = screen.getByRole('columnheader', { name: /exposure/i });
+      
+      // Initially sorted by percentage descending (Josh Allen should be first)
+      let playerRows = screen.getAllByRole('row');
+      expect(playerRows[1]).toHaveTextContent('Josh Allen'); // Highest percentage
+
+      // First click should toggle to ascending
+      fireEvent.click(exposureHeader);
+      playerRows = screen.getAllByRole('row');
+      expect(playerRows[1]).toHaveTextContent('Tyreek Hill'); // Lowest percentage
+
+      // Second click should toggle back to descending
+      fireEvent.click(exposureHeader);
+      playerRows = screen.getAllByRole('row');
+      expect(playerRows[1]).toHaveTextContent('Josh Allen'); // Highest percentage again
+    });
+
+    it('calls onCountClick when percentage button is clicked', () => {
+      const mockOnCountClick = vi.fn();
+      
+      render(
+        <PlayerTable
+          players={mockExposurePlayers}
+          title="Exposure Report"
+          displayMode="percentage"
+          onCountClick={mockOnCountClick}
+        />
+      );
+
+      const percentageButtons = screen.getAllByRole('button');
+      fireEvent.click(percentageButtons[0]); // Click first percentage button
+
+      expect(mockOnCountClick).toHaveBeenCalledWith(
+        mockExposurePlayers[0].playerId, // Josh Allen's ID (first in sorted order)
+        mockExposurePlayers[0].leagues
+      );
+    });
+
+    it('displays percentage as text when onCountClick is not provided', () => {
+      render(
+        <PlayerTable
+          players={mockExposurePlayers}
+          title="Exposure Report"
+          displayMode="percentage"
+        />
+      );
+
+      // Should not have any buttons when onCountClick is not provided
+      const percentageButtons = screen.queryAllByRole('button');
+      expect(percentageButtons).toHaveLength(0);
+
+      // Should display percentages as text
+      expect(screen.getByText('75.0%')).toBeInTheDocument();
+      expect(screen.getByText('50.0%')).toBeInTheDocument();
+      expect(screen.getByText('25.0%')).toBeInTheDocument();
+    });
+
+    it('displays correct aria-sort attributes for percentage mode', () => {
+      render(
+        <PlayerTable
+          players={mockExposurePlayers}
+          title="Exposure Report"
+          displayMode="percentage"
+        />
+      );
+
+      const exposureHeader = screen.getByRole('columnheader', { name: /exposure/i });
+      const nameHeader = screen.getByRole('columnheader', { name: /player/i });
+
+      // Exposure should be sorted descending by default
+      expect(exposureHeader).toHaveAttribute('aria-sort', 'descending');
+      expect(nameHeader).toHaveAttribute('aria-sort', 'none');
+
+      // Click name header
+      fireEvent.click(nameHeader);
+      expect(nameHeader).toHaveAttribute('aria-sort', 'ascending');
+      expect(exposureHeader).toHaveAttribute('aria-sort', 'none');
+    });
   });
 });

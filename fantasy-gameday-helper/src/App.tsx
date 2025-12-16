@@ -16,8 +16,10 @@ function App() {
     setUser, 
     setWeek, 
     setUserTeams,
-    setGamedayData, 
-    setLoading, 
+    setGamedayData,
+    setExposureData,
+    setLoading,
+    setExposureLoading,
     setError, 
     clearError,
     openPopup,
@@ -154,7 +156,7 @@ function App() {
           userId
         };
 
-        console.log('Generating gameday analysis with input:', {
+        console.log('Generating gameday and exposure analysis with input:', {
           userTeamsCount: userTeams.length,
           leaguesCount: leagues.length,
           rostersCount: rostersMap.size,
@@ -163,6 +165,10 @@ function App() {
 
         const gamedayData = playerAnalysisService.analyzePlayerData(analysisInput);
         setGamedayData(gamedayData);
+
+        // Generate exposure analysis
+        const exposureData = playerAnalysisService.calculateExposureReport(analysisInput);
+        setExposureData(exposureData);
       } else {
         setError('No teams found for this user in any leagues');
       }
@@ -201,8 +207,8 @@ function App() {
   }, [state.user, state.selectedWeek, setWeek, loadLeagueDataWithWeek]);
 
   /**
-   * Recalculate gameday data when team selections change
-   * Requirements: 3.5, 4.5 - Reactive table updates
+   * Recalculate gameday and exposure data when team selections change
+   * Requirements: 3.5, 4.5, 11.5 - Reactive table updates
    */
   const recalculateGamedayData = useCallback((
     userTeams: UserTeam[], 
@@ -212,6 +218,9 @@ function App() {
     userId: string
   ) => {
     try {
+      // Set loading state for exposure recalculations
+      setExposureLoading(true);
+      
       const analysisInput: AnalysisInput = {
         userTeams,
         leagues,
@@ -222,11 +231,16 @@ function App() {
 
       const gamedayData = playerAnalysisService.analyzePlayerData(analysisInput);
       setGamedayData(gamedayData);
+
+      // Recalculate exposure data as well
+      const exposureData = playerAnalysisService.calculateExposureReport(analysisInput);
+      setExposureData(exposureData);
     } catch (error) {
       console.error('Failed to recalculate gameday data:', error);
       setError('Failed to update player analysis');
+      setExposureLoading(false); // Clear loading state on error
     }
-  }, [setGamedayData, setError]);
+  }, [setGamedayData, setExposureData, setExposureLoading, setError]);
 
   /**
    * Handle player count clicks to show league info popup

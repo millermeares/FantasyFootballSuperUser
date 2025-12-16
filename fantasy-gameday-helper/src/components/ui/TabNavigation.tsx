@@ -1,6 +1,6 @@
 import { useAppContext } from '../../context';
 import { useEffect, useState, useCallback } from 'react';
-import { GamedayView } from '../../views';
+import { GamedayView, ExposureView } from '../../views';
 import './TabNavigation.css';
 
 interface TabNavigationProps {
@@ -111,14 +111,7 @@ export function TabNavigation({ onPlayerCountClick }: TabNavigationProps) {
             role="region"
             aria-label="Exposure report content"
           >
-            {/* Placeholder for ExposureView component */}
-            <div className="placeholder-content">
-              <h3>Exposure Report</h3>
-              <p>This will contain the ownership percentage analysis</p>
-              <small>
-                {isMobile ? 'Mobile view - tabs at bottom' : 'Desktop view - tabs at top'}
-              </small>
-            </div>
+            <ExposureView onPlayerCountClick={handlePlayerCountClick} />
           </div>
         )}
       </div>

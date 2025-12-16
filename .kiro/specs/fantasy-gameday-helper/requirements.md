@@ -17,6 +17,11 @@ The Fantasy Gameday Helper is a React web application designed for fantasy footb
 - **Local_Storage**: Browser storage mechanism for persisting user preferences and identifiers
 - **Matchup_Cache**: Persistent storage of Sleeper_API responses to minimize API calls and improve performance
 - **League_Info_Popup**: User interface element displaying detailed league information when player counts are clicked
+- **Exposure_Report**: Analysis showing ownership percentage of all players across user's fantasy teams
+- **Exposure_Percentage**: The percentage of selected teams that contain a specific player, calculated as (teams with player / total selected teams) × 100
+- **All_Roster_Positions**: Complete roster including starting lineup, bench players, taxi squad, and injured reserve
+- **Tabbed_Interface**: Navigation component allowing users to switch between different views (Gameday and Exposure)
+- **Responsive_Tab_Layout**: Tab positioning that adapts based on device type (top for desktop, bottom for mobile)
 
 ## Requirements
 
@@ -141,3 +146,28 @@ The Fantasy Gameday Helper is a React web application designed for fantasy footb
 3. WHEN invalid data is received from the API, THE Fantasy_Gameday_Helper SHALL filter out problematic entries and continue processing valid data
 4. WHEN network connectivity is lost, THE Fantasy_Gameday_Helper SHALL detect the condition and provide offline-appropriate messaging
 5. WHEN unexpected errors occur, THE Fantasy_Gameday_Helper SHALL log error details and display user-friendly error messages
+
+### Requirement 11
+
+**User Story:** As a fantasy football super player, I want to see an exposure report showing my ownership percentage of all players across my teams, so that I can understand my portfolio diversification and risk exposure.
+
+#### Acceptance Criteria
+
+1. WHEN the exposure report is displayed, THE Fantasy_Gameday_Helper SHALL include all players from all roster positions including bench, taxi squad, and injured reserve
+2. WHEN calculating exposure percentages, THE Fantasy_Gameday_Helper SHALL divide the number of teams containing each player by the total number of selected teams and display as a percentage
+3. WHEN displaying the exposure table, THE Fantasy_Gameday_Helper SHALL sort players by exposure percentage in descending order
+4. WHEN a user clicks on a player's exposure percentage, THE Fantasy_Gameday_Helper SHALL display a popup showing which specific leagues contain that player
+5. WHEN team selections change, THE Fantasy_Gameday_Helper SHALL recalculate and update the exposure table immediately
+
+### Requirement 12
+
+**User Story:** As a fantasy football super player, I want to navigate between gameday analysis and exposure reports using a tabbed interface, so that I can easily switch between different views of my fantasy data.
+
+#### Acceptance Criteria
+
+1. WHEN the application loads with team data, THE Fantasy_Gameday_Helper SHALL display a tabbed interface with "Gameday" and "Exposure" tabs
+2. WHEN a user clicks on the "Gameday" tab, THE Fantasy_Gameday_Helper SHALL display the existing cheering for/against tables
+3. WHEN a user clicks on the "Exposure" tab, THE Fantasy_Gameday_Helper SHALL display the exposure report table
+4. WHEN on desktop devices, THE Fantasy_Gameday_Helper SHALL position tabs at the top of the interface
+5. WHEN on mobile devices, THE Fantasy_Gameday_Helper SHALL position tabs at the bottom of the interface for better thumb accessibility
+6. WHEN switching between tabs, THE Fantasy_Gameday_Helper SHALL preserve the current team selections and week settings

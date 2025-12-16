@@ -1,18 +1,26 @@
 import { useState, useMemo } from 'react';
-import type { PlayerAllegiance } from '../../types/app';
+import type { PlayerAllegiance, PlayerExposure } from '../../types/app';
 import './PlayerTable.css';
 
+export type DisplayMode = 'count' | 'percentage';
+
 interface PlayerTableProps {
-  players: PlayerAllegiance[];
+  players: PlayerAllegiance[] | PlayerExposure[];
   title: string;
   subtitle?: string;
   onCountClick?: (playerId: string, leagues: string[]) => void;
   className?: string;
   emptyMessage?: string;
+  displayMode?: DisplayMode;
 }
 
-type SortField = 'count' | 'name' | 'position' | 'team';
+type SortField = 'count' | 'percentage' | 'name' | 'position' | 'team';
 type SortDirection = 'asc' | 'desc';
+
+// Type guard to check if player is PlayerExposure
+function isPlayerExposure(player: PlayerAllegiance | PlayerExposure): player is PlayerExposure {
+  return 'exposurePercentage' in player;
+}
 
 export function PlayerTable({
   players,
@@ -20,9 +28,10 @@ export function PlayerTable({
   subtitle,
   onCountClick,
   className = '',
-  emptyMessage = 'No players found'
+  emptyMessage = 'No players found',
+  displayMode = 'count'
 }: PlayerTableProps) {
-  const [sortField, setSortField] = useState<SortField>('count');
+  const [sortField, setSortField] = useState<SortField>(displayMode === 'percentage' ? 'percentage' : 'count');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   // Sort players based on current sort configuration
@@ -32,7 +41,16 @@ export function PlayerTable({
 
       switch (sortField) {
         case 'count':
-          comparison = a.count - b.count;
+          // For PlayerAllegiance, use count; for PlayerExposure, use teamCount
+          const aCount = isPlayerExposure(a) ? a.teamCount : a.count;
+          const bCount = isPlayerExposure(b) ? b.teamCount : b.count;
+          comparison = aCount - bCount;
+          break;
+        case 'percentage':
+          // Only available for PlayerExposure
+          if (isPlayerExposure(a) && isPlayerExposure(b)) {
+            comparison = a.exposurePercentage - b.exposurePercentage;
+          }
           break;
         case 'name':
           comparison = a.playerName.localeCompare(b.playerName);
@@ -59,12 +77,12 @@ export function PlayerTable({
     } else {
       // Set new field with appropriate default direction
       setSortField(field);
-      setSortDirection(field === 'count' ? 'desc' : 'asc');
+      setSortDirection(field === 'count' || field === 'percentage' ? 'desc' : 'asc');
     }
   };
 
-  // Handle count click
-  const handleCountClick = (player: PlayerAllegiance) => {
+  // Handle count/percentage click
+  const handleValueClick = (player: PlayerAllegiance | PlayerExposure) => {
     if (onCountClick) {
       onCountClick(player.playerId, player.leagues);
     }
@@ -159,25 +177,47 @@ export function PlayerTable({
                 >
                   Team{getSortIndicator('team')}
                 </th>
-                <th 
-                  className={getSortableHeaderClass('count')}
-                  onClick={() => handleSort('count')}
-                  role="columnheader"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      handleSort('count');
+                {displayMode === 'percentage' ? (
+                  <th 
+                    className={getSortableHeaderClass('percentage')}
+                    onClick={() => handleSort('percentage')}
+                    role="columnheader"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleSort('percentage');
+                      }
+                    }}
+                    aria-sort={
+                      sortField === 'percentage' 
+                        ? sortDirection === 'asc' ? 'ascending' : 'descending'
+                        : 'none'
                     }
-                  }}
-                  aria-sort={
-                    sortField === 'count' 
-                      ? sortDirection === 'asc' ? 'ascending' : 'descending'
-                      : 'none'
-                  }
-                >
-                  Count{getSortIndicator('count')}
-                </th>
+                  >
+                    Exposure{getSortIndicator('percentage')}
+                  </th>
+                ) : (
+                  <th 
+                    className={getSortableHeaderClass('count')}
+                    onClick={() => handleSort('count')}
+                    role="columnheader"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleSort('count');
+                      }
+                    }}
+                    aria-sort={
+                      sortField === 'count' 
+                        ? sortDirection === 'asc' ? 'ascending' : 'descending'
+                        : 'none'
+                    }
+                  >
+                    Count{getSortIndicator('count')}
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -193,18 +233,34 @@ export function PlayerTable({
                     <span className="team-name">{player.team}</span>
                   </td>
                   <td className="count-cell">
-                    {onCountClick ? (
-                      <button
-                        type="button"
-                        className="count-button"
-                        onClick={() => handleCountClick(player)}
-                        title={`View leagues for ${player.playerName}`}
-                        aria-label={`${player.count} appearances, click to view leagues`}
-                      >
-                        {player.count}
-                      </button>
+                    {displayMode === 'percentage' && isPlayerExposure(player) ? (
+                      onCountClick ? (
+                        <button
+                          type="button"
+                          className="count-button"
+                          onClick={() => handleValueClick(player)}
+                          title={`View leagues for ${player.playerName}`}
+                          aria-label={`${player.exposurePercentage.toFixed(1)}% exposure, click to view leagues`}
+                        >
+                          {player.exposurePercentage.toFixed(1)}%
+                        </button>
+                      ) : (
+                        <span className="count-display">{player.exposurePercentage.toFixed(1)}%</span>
+                      )
                     ) : (
-                      <span className="count-display">{player.count}</span>
+                      onCountClick ? (
+                        <button
+                          type="button"
+                          className="count-button"
+                          onClick={() => handleValueClick(player)}
+                          title={`View leagues for ${player.playerName}`}
+                          aria-label={`${isPlayerExposure(player) ? player.teamCount : player.count} appearances, click to view leagues`}
+                        >
+                          {isPlayerExposure(player) ? player.teamCount : player.count}
+                        </button>
+                      ) : (
+                        <span className="count-display">{isPlayerExposure(player) ? player.teamCount : player.count}</span>
+                      )
                     )}
                   </td>
                 </tr>

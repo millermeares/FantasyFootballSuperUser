@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import type { AppState, AppAction, GamedayData, PlayerAllegiance, UserTeam } from '../types';
+import type { AppState, AppAction, GamedayData, ExposureData, PlayerAllegiance, PlayerExposure, UserTeam } from '../types';
 import type { SleeperUser } from '../types/sleeper';
 
 // Initial state
@@ -9,8 +9,10 @@ const initialState: AppState = {
   selectedWeek: 1, // Will be updated to current week when available
   userTeams: [],
   gamedayData: null,
+  exposureData: null,
   activeTab: 'gameday',
   loading: false,
+  exposureLoading: false,
   error: null,
   popupData: {
     isOpen: false,
@@ -35,6 +37,8 @@ function appReducer(state: AppState, action: AppAction): AppState {
         user: null,
         userTeams: [],
         gamedayData: null,
+        exposureData: null,
+        exposureLoading: false,
         error: null,
         popupData: {
           isOpen: false,
@@ -97,6 +101,14 @@ function appReducer(state: AppState, action: AppAction): AppState {
         error: null,
       };
 
+    case 'SET_EXPOSURE_DATA':
+      return {
+        ...state,
+        exposureData: action.payload,
+        exposureLoading: false,
+        error: null,
+      };
+
     case 'SET_ACTIVE_TAB':
       return {
         ...state,
@@ -107,6 +119,12 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         loading: action.payload,
+      };
+
+    case 'SET_EXPOSURE_LOADING':
+      return {
+        ...state,
+        exposureLoading: action.payload,
       };
 
     case 'SET_ERROR':
@@ -160,11 +178,13 @@ interface AppContextType {
   selectAllTeams: () => void;
   deselectAllTeams: () => void;
   setGamedayData: (data: GamedayData) => void;
+  setExposureData: (data: ExposureData) => void;
   setActiveTab: (tab: 'gameday' | 'exposure') => void;
   setLoading: (loading: boolean) => void;
+  setExposureLoading: (loading: boolean) => void;
   setError: (error: string) => void;
   clearError: () => void;
-  openPopup: (player: PlayerAllegiance, leagues: string[]) => void;
+  openPopup: (player: PlayerAllegiance | PlayerExposure, leagues: string[]) => void;
   closePopup: () => void;
 }
 
@@ -272,12 +292,20 @@ export function AppProvider({ children }: AppProviderProps) {
     dispatch({ type: 'SET_GAMEDAY_DATA', payload: data });
   };
 
+  const setExposureData = (data: ExposureData) => {
+    dispatch({ type: 'SET_EXPOSURE_DATA', payload: data });
+  };
+
   const setActiveTab = (tab: 'gameday' | 'exposure') => {
     dispatch({ type: 'SET_ACTIVE_TAB', payload: tab });
   };
 
   const setLoading = (loading: boolean) => {
     dispatch({ type: 'SET_LOADING', payload: loading });
+  };
+
+  const setExposureLoading = (loading: boolean) => {
+    dispatch({ type: 'SET_EXPOSURE_LOADING', payload: loading });
   };
 
   const setError = (error: string) => {
@@ -288,7 +316,7 @@ export function AppProvider({ children }: AppProviderProps) {
     dispatch({ type: 'CLEAR_ERROR' });
   };
 
-  const openPopup = (player: PlayerAllegiance, leagues: string[]) => {
+  const openPopup = (player: PlayerAllegiance | PlayerExposure, leagues: string[]) => {
     dispatch({ type: 'OPEN_POPUP', payload: { player, leagues } });
   };
 
@@ -307,8 +335,10 @@ export function AppProvider({ children }: AppProviderProps) {
     selectAllTeams,
     deselectAllTeams,
     setGamedayData,
+    setExposureData,
     setActiveTab,
     setLoading,
+    setExposureLoading,
     setError,
     clearError,
     openPopup,

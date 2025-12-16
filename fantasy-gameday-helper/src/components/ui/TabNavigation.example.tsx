@@ -11,11 +11,15 @@ import { AppProvider } from '../../context';
  * - Placeholder content areas for future components
  */
 
+const mockPlayerCountClick = (playerId: string, leagues: string[]) => {
+  console.log('Player clicked:', playerId, leagues);
+};
+
 export function TabNavigationExample() {
   return (
     <div style={{ height: '400px', border: '1px solid #ccc', borderRadius: '8px' }}>
       <AppProvider>
-        <TabNavigation />
+        <TabNavigation onPlayerCountClick={mockPlayerCountClick} />
       </AppProvider>
     </div>
   );
@@ -29,7 +33,7 @@ export function TabNavigationWithCustomContent() {
           <h2 style={{ padding: '1rem', margin: 0, backgroundColor: '#f8f9fa' }}>
             Fantasy Gameday Helper
           </h2>
-          <TabNavigation />
+          <TabNavigation onPlayerCountClick={mockPlayerCountClick} />
         </div>
       </AppProvider>
     </div>
@@ -48,7 +52,7 @@ export function ResponsiveTabExample() {
         marginBottom: '2rem'
       }}>
         <AppProvider>
-          <TabNavigation />
+          <TabNavigation onPlayerCountClick={mockPlayerCountClick} />
         </AppProvider>
       </div>
 
@@ -60,7 +64,7 @@ export function ResponsiveTabExample() {
         borderRadius: '8px'
       }}>
         <AppProvider>
-          <TabNavigation />
+          <TabNavigation onPlayerCountClick={mockPlayerCountClick} />
         </AppProvider>
       </div>
     </div>

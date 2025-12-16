@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 import { useAppContext } from '../context';
 import { PlayerTable } from '../components/tables';
-import type { PlayerAllegiance } from '../types/app';
 
 interface GamedayViewProps {
   onPlayerCountClick: (playerId: string, leagues: string[]) => void;

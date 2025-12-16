@@ -11,27 +11,31 @@ The Fantasy Gameday Helper is a React-based web application that integrates with
 The application follows a modern React architecture with clear separation of concerns:
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Presentation Layer                        │
-│  ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐│
-│  │   Team Filter   │ │ Cheering For    │ │ Cheering Against││
-│  │   Component     │ │ Table Component │ │ Table Component ││
-│  └─────────────────┘ └─────────────────┘ └─────────────────┘│
-└─────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────┐
-│                    Application Layer                         │
-│  ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐│
-│  │ State Management│ │ Player Analysis │ │ Cache Management││
-│  │    (Context)    │ │    Service      │ │    Service      ││
-│  └─────────────────┘ └─────────────────┘ └─────────────────┘│
-└─────────────────────────────────────────────────────────────┘
-┌─────────────────────────────────────────────────────────────┐
-│                      Data Layer                             │
-│  ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐│
-│  │ Sleeper API     │ │ Local Storage   │ │ Cache Storage   ││
-│  │ Integration     │ │ Service         │ │ Service         ││
-│  └─────────────────┘ └─────────────────┘ └─────────────────┘│
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           Presentation Layer                                    │
+│  ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐│
+│  │ Tab Navigation  │ │   Team Filter   │ │   Gameday View  │ │  Exposure View  ││
+│  │   Component     │ │   Component     │ │   Component     │ │   Component     ││
+│  └─────────────────┘ └─────────────────┘ └─────────────────┘ └─────────────────┘│
+│  ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐│
+│  │ Cheering For    │ │ Cheering Against│ │ Exposure Table  │ │ League Info     ││
+│  │ Table Component │ │ Table Component │ │   Component     │ │ Popup Component ││
+│  └─────────────────┘ └─────────────────┘ └─────────────────┘ └─────────────────┘│
+└─────────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                          Application Layer                                      │
+│  ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐│
+│  │ State Management│ │ Player Analysis │ │Exposure Analysis│ │ Cache Management││
+│  │    (Context)    │ │    Service      │ │    Service      │ │    Service      ││
+│  └─────────────────┘ └─────────────────┘ └─────────────────┘ └─────────────────┘│
+└─────────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                            Data Layer                                           │
+│  ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐│
+│  │ Sleeper API     │ │ Local Storage   │ │ Cache Storage   │ │ Player Data     ││
+│  │ Integration     │ │ Service         │ │ Service         │ │ Service         ││
+│  └─────────────────┘ └─────────────────┘ └─────────────────┘ └─────────────────┘│
+└─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Technology Stack
@@ -48,32 +52,54 @@ The application follows a modern React architecture with clear separation of con
 ### Core Components
 
 #### 1. App Component
-- Root component managing global state and routing
+- Root component managing global state and tabbed navigation
 - Handles user identifier persistence and initial data loading
-- Coordinates between child components
+- Coordinates between child components and tab switching
 
-#### 2. UserIdentifierInput Component
+#### 2. TabNavigation Component
+- Responsive tab interface for switching between Gameday and Exposure views
+- Adaptive positioning (top for desktop, bottom for mobile)
+- Preserves state when switching tabs
+
+#### 3. GamedayView Component
+- Container for existing gameday functionality
+- Houses cheering for/against tables
+- Maintains current gameday-specific logic
+
+#### 4. ExposureView Component
+- Container for exposure report functionality
+- Houses exposure table and related controls
+- Manages exposure-specific calculations
+
+#### 5. UserIdentifierInput Component
 - Input form for Sleeper username/ID
 - Validation and error handling
 - Integration with local storage for persistence
 
-#### 3. WeekSelector Component
+#### 6. WeekSelector Component
 - Dropdown/input for NFL week selection
 - Automatic current week detection
 - Validation for valid week ranges (1-18)
 
-#### 4. TeamFilter Component
+#### 7. TeamFilter Component
 - Expandable list of user's fantasy teams
 - Checkbox controls for team inclusion/exclusion
 - Summary display when collapsed
 
-#### 5. PlayerTable Component (Reusable)
+#### 8. PlayerTable Component (Reusable)
 - Generic table for displaying player data
-- Sortable by appearance count
-- Clickable count numbers for league info popups
-- Props: `players`, `title`, `onCountClick`
+- Supports both count and percentage display modes
+- Sortable by appearance count or exposure percentage
+- Clickable numbers for league info popups
+- Props: `players`, `title`, `displayMode`, `onCountClick`
 
-#### 6. LeagueInfoPopup Component
+#### 9. ExposureTable Component
+- Specialized table for exposure report display
+- Shows ownership percentages instead of counts
+- Includes all roster positions (bench, taxi, IR)
+- Sortable by exposure percentage
+
+#### 10. LeagueInfoPopup Component
 - Modal/tooltip displaying league details
 - Shows which leagues contain a specific player
 - Dismissible overlay
@@ -145,10 +171,26 @@ interface PlayerAllegiance {
   leagues: string[]; // League names where this player appears
 }
 
+interface PlayerExposure {
+  playerId: string;
+  playerName: string;
+  position: string;
+  team: string;
+  exposurePercentage: number; // Percentage of selected teams containing this player
+  teamCount: number; // Number of teams containing this player
+  totalTeams: number; // Total number of selected teams
+  leagues: string[]; // League names where this player appears
+}
+
 interface GamedayData {
   cheeringFor: PlayerAllegiance[];
   cheeringAgainst: PlayerAllegiance[];
   userTeams: UserTeam[];
+}
+
+interface ExposureData {
+  exposureReport: PlayerExposure[];
+  totalSelectedTeams: number;
 }
 ```
 
@@ -168,6 +210,16 @@ interface PlayerService {
   getPlayerInfo(playerId: string): SleeperPlayerData | null;
   getPlayerPosition(playerId: string): string; // Returns 'Unknown' if not found
   getPlayerTeam(playerId: string): string; // Returns 'FA' if not found
+}
+
+interface PlayerAnalysisService {
+  // Existing gameday methods (filter for starters only)
+  calculateGamedayAllegiances(userTeams: UserTeam[], matchups: SleeperMatchup[]): GamedayData;
+  
+  // New exposure methods (include all roster positions)
+  calculateExposureReport(userTeams: UserTeam[], rosters: SleeperRoster[]): ExposureData;
+  getPlayerExposurePercentage(playerId: string, userTeams: UserTeam[], rosters: SleeperRoster[]): number;
+  getAllRosterPlayers(roster: SleeperRoster): string[]; // Returns all players including bench, taxi, IR
 }
 ```
 
@@ -230,11 +282,13 @@ interface AppState {
   selectedWeek: number;
   userTeams: UserTeam[];
   gamedayData: GamedayData | null;
+  exposureData: ExposureData | null;
+  activeTab: 'gameday' | 'exposure';
   loading: boolean;
   error: string | null;
   popupData: {
     isOpen: boolean;
-    player: PlayerAllegiance | null;
+    player: PlayerAllegiance | PlayerExposure | null;
     leagues: string[];
   };
 }
@@ -244,9 +298,11 @@ type AppAction =
   | { type: 'SET_WEEK'; payload: number }
   | { type: 'TOGGLE_TEAM'; payload: string } // leagueId
   | { type: 'SET_GAMEDAY_DATA'; payload: GamedayData }
+  | { type: 'SET_EXPOSURE_DATA'; payload: ExposureData }
+  | { type: 'SET_ACTIVE_TAB'; payload: 'gameday' | 'exposure' }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string }
-  | { type: 'OPEN_POPUP'; payload: { player: PlayerAllegiance; leagues: string[] } }
+  | { type: 'OPEN_POPUP'; payload: { player: PlayerAllegiance | PlayerExposure; leagues: string[] } }
   | { type: 'CLOSE_POPUP' };
 ```
 
@@ -352,6 +408,38 @@ Property 12: API data filtering
 *For any* API response containing invalid or malformed data, the system should filter out problematic entries and continue processing valid data
 **Validates: Requirements 10.3**
 
+Property 13: Complete roster inclusion for exposure
+*For any* roster containing players in different positions (starters, bench, taxi, IR), the exposure calculation should include all players regardless of their roster position
+**Validates: Requirements 11.1**
+
+Property 14: Exposure percentage calculation accuracy
+*For any* set of selected teams and player distributions, the exposure percentage should equal (teams containing player / total selected teams) × 100
+**Validates: Requirements 11.2**
+
+Property 15: Exposure table sorting consistency
+*For any* set of players with exposure percentages, the exposure table should display players sorted by exposure percentage in descending order
+**Validates: Requirements 11.3**
+
+Property 16: Exposure popup accuracy
+*For any* player in the exposure table, clicking the exposure percentage should display a popup containing exactly the leagues where that player appears
+**Validates: Requirements 11.4**
+
+Property 17: Exposure reactive updates
+*For any* change in team selections, the exposure table should immediately reflect updated calculations without requiring manual refresh
+**Validates: Requirements 11.5**
+
+Property 18: Tab navigation functionality
+*For any* tab selection (Gameday or Exposure), clicking the tab should display the corresponding content and update the active tab state
+**Validates: Requirements 12.2, 12.3**
+
+Property 19: Responsive tab positioning
+*For any* device type (desktop or mobile), the tab positioning should adapt appropriately (top for desktop, bottom for mobile)
+**Validates: Requirements 12.4, 12.5**
+
+Property 20: State preservation during tab switching
+*For any* tab switch operation, the current team selections and week settings should remain unchanged
+**Validates: Requirements 12.6**
+
 ## Error Handling
 
 ### Error Categories and Strategies
@@ -435,11 +523,14 @@ describe('Fantasy Gameday Helper Properties', () => {
 ### Unit Testing Focus Areas
 
 - Component rendering with various props
-- User interaction handlers (clicks, form submissions)
+- User interaction handlers (clicks, form submissions, tab navigation)
 - API service integration points
 - Cache service functionality
 - Error boundary behavior
 - Responsive layout adaptation
+- Tab switching and state preservation
+- Exposure calculation accuracy
+- Responsive tab positioning
 
 ### Integration Testing
 

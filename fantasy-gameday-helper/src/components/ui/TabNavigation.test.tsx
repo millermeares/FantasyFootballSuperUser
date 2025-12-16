@@ -67,9 +67,9 @@ describe('TabNavigation', () => {
     const exposureTab = screen.getByRole('tab', { name: /exposure/i });
     fireEvent.click(exposureTab);
 
-    // Check that exposure content is displayed
-    expect(screen.getByText('Exposure Report')).toBeInTheDocument();
-    expect(screen.getByText('This will contain the ownership percentage analysis')).toBeInTheDocument();
+    // Check that exposure content is displayed (shows empty state when no teams)
+    expect(screen.getByText('No teams selected')).toBeInTheDocument();
+    expect(screen.getByText('Select at least one team from the team filter above to see your exposure report.')).toBeInTheDocument();
   });
 
   it('updates tab active states when switching tabs', () => {
@@ -148,8 +148,8 @@ describe('TabNavigation', () => {
     gamedayTab.focus();
     fireEvent.keyDown(gamedayTab, { key: 'ArrowRight' });
 
-    // Should switch to exposure content
-    expect(screen.getByText('Exposure Report')).toBeInTheDocument();
+    // Should switch to exposure content (shows empty state when no teams)
+    expect(screen.getByText('No teams selected')).toBeInTheDocument();
   });
 
   it('applies responsive CSS classes based on viewport', () => {
