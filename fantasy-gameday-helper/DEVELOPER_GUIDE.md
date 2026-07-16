@@ -64,6 +64,9 @@ npm run dev
 
 # Preview production build
 npm run preview
+
+# Update players data from Sleeper API
+npm run update-players
 ```
 
 ### Testing Best Practices

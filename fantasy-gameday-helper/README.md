@@ -23,14 +23,15 @@ npm test -- --run --grep "sorting"
 ### Available Scripts
 
 ```bash
-npm run dev          # Start development server
-npm run build        # Build for production
-npm test             # Run tests in watch mode
-npm run test:run     # Run tests once and exit
-npm run lint         # Check code quality
-npm run lint:fix     # Fix linting issues
-npm run format       # Format code with Prettier
-npm run preview      # Preview production build
+npm run dev             # Start development server
+npm run build           # Build for production
+npm test                # Run tests in watch mode
+npm run test:run        # Run tests once and exit
+npm run lint            # Check code quality
+npm run lint:fix        # Fix linting issues
+npm run format          # Format code with Prettier
+npm run preview         # Preview production build
+npm run update-players  # Update players data from Sleeper API
 ```
 
 ### Project Structure
