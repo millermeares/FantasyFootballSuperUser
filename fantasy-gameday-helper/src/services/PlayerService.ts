@@ -10,8 +10,7 @@ export class PlayerService {
   private playersData: SleeperPlayerData;
 
   private constructor() {
-    // Extract the actual player data from the axios response structure
-    this.playersData = (playersResponse as any).data;
+    this.playersData = playersResponse as unknown as SleeperPlayerData;
   }
 
   /**
