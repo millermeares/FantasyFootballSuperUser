@@ -1,4 +1,4 @@
-import playersResponse from '../data/players.json';
+import playersResponse from '../data/players.json' assert { type: 'json' };
 import type { SleeperPlayerData } from '../types';
 
 /**
@@ -10,7 +10,7 @@ export class PlayerService {
   private playersData: SleeperPlayerData;
 
   private constructor() {
-    this.playersData = playersResponse as unknown as SleeperPlayerData;
+    this.playersData = playersResponse as SleeperPlayerData;
   }
 
   /**
