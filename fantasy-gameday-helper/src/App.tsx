@@ -254,16 +254,17 @@ function App() {
 
   /**
    * Handle player count clicks to show league info popup
-   * Requirements: 3.4, 4.4 - League info popup functionality
+   * Requirements: 3.4, 4.4, 11.4 - League info popup functionality
    */
   const handlePlayerCountClick = useCallback((playerId: string, leagues: string[]) => {
     const player = state.gamedayData?.cheeringFor.find(p => p.playerId === playerId) ||
-                   state.gamedayData?.cheeringAgainst.find(p => p.playerId === playerId);
+                   state.gamedayData?.cheeringAgainst.find(p => p.playerId === playerId) ||
+                   state.exposureData?.exposureReport.find(p => p.playerId === playerId);
     
     if (player) {
       openPopup(player, leagues);
     }
-  }, [state.gamedayData, openPopup]);
+  }, [state.gamedayData, state.exposureData, openPopup]);
 
   /**
    * Initialize app on mount
