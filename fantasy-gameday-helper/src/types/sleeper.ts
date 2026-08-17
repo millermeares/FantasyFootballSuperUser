@@ -41,16 +41,18 @@ export interface SleeperPlayer {
   team: string;
 }
 
+export interface SleeperPlayerEntry {
+  player_id: string;
+  full_name?: string | null;
+  position?: string | null;
+  team?: string | null;
+  first_name?: string;
+  last_name?: string;
+  active?: boolean;
+  fantasy_positions?: string[] | null;
+  [key: string]: unknown;
+}
+
 export interface SleeperPlayerData {
-  [playerId: string]: {
-    player_id: string;
-    full_name: string;
-    position: string;
-    team: string | null;
-    first_name: string;
-    last_name: string;
-    active: boolean;
-    fantasy_positions: string[];
-    // ... other fields as needed
-  };
+  [playerId: string]: SleeperPlayerEntry;
 }

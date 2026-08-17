@@ -30,10 +30,16 @@ export class PlayerService {
    */
   public getPlayerName(playerId: string): string {
     const player = this.playersData[playerId];
-    if (!player || !player.full_name) {
+    if (!player) {
       return 'Unknown Player';
     }
-    return player.full_name;
+    if (player.full_name) {
+      return player.full_name;
+    }
+    if (player.first_name && player.last_name) {
+      return `${player.first_name} ${player.last_name}`;
+    }
+    return 'Unknown Player';
   }
 
   /**
