@@ -19,6 +19,14 @@ interface PlayerCount {
 }
 
 /**
+ * Check if a player ID represents an actual player.
+ * Sleeper uses "0" as a placeholder for empty roster slots.
+ */
+function isValidPlayerId(playerId: string | null | undefined): playerId is string {
+  return !!playerId && playerId !== '0';
+}
+
+/**
  * Service for analyzing player data and determining allegiances
  * Implements the core logic for counting player appearances and resolving conflicts
  */
@@ -102,7 +110,7 @@ export class PlayerAnalysisService {
 
       // Count each starter
       for (const playerId of userMatchup.starters) {
-        if (!playerId) continue; // Skip null/undefined players
+        if (!isValidPlayerId(playerId)) continue;
 
         const existing = playerCounts.get(playerId);
         if (existing) {
@@ -160,7 +168,7 @@ export class PlayerAnalysisService {
 
       // Count each opponent starter
       for (const playerId of opponentMatchup.starters) {
-        if (!playerId) continue; // Skip null/undefined players
+        if (!isValidPlayerId(playerId)) continue;
 
         const existing = playerCounts.get(playerId);
         if (existing) {
@@ -248,7 +256,7 @@ export class PlayerAnalysisService {
       console.warn('Invalid roster data:', roster);
       return [];
     }
-    return roster.players.filter(playerId => playerId != null);
+    return roster.players.filter(isValidPlayerId);
   }
 
   /**
