@@ -67,7 +67,6 @@ export function GamedayView({ onPlayerCountClick }: GamedayViewProps) {
           <div className="table-section">
             <PlayerTable
               title="Players to Cheer For"
-              subtitle={`${state.gamedayData.cheeringFor.length} players in your starting lineups`}
               players={state.gamedayData.cheeringFor}
               onCountClick={handlePlayerCountClick}
               emptyMessage="No players found in your selected teams' starting lineups"
@@ -78,7 +77,6 @@ export function GamedayView({ onPlayerCountClick }: GamedayViewProps) {
           <div className="table-section">
             <PlayerTable
               title="Players to Cheer Against"
-              subtitle={`${state.gamedayData.cheeringAgainst.length} players in opponent lineups`}
               players={state.gamedayData.cheeringAgainst}
               onCountClick={handlePlayerCountClick}
               emptyMessage="No opponent players found for your selected teams"
