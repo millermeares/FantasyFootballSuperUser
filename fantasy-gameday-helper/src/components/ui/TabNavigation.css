@@ -7,20 +7,26 @@
 }
 
 /* Desktop layout - tabs at top */
+.tab-header {
+  display: flex;
+  flex-direction: column;
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #e0e0e0;
+  border-radius: 6px 6px 0 0;
+  overflow: hidden;
+}
+
 .tab-buttons {
   display: flex;
-  border-bottom: 2px solid #e0e0e0;
   background-color: #f8f9fa;
-  order: 1; /* Tabs first on desktop */
   position: relative;
   z-index: 10;
 }
 
 .tab-content {
   flex: 1;
-  padding: 1rem;
+  padding: 1rem 0;
   overflow-y: auto;
-  order: 2; /* Content second on desktop */
   position: relative;
 }
 
@@ -102,20 +108,21 @@
     height: 100vh; /* Full viewport height on mobile */
   }
   
-  .tab-buttons {
-    order: 1; /* Tabs at top on mobile */
-    border-bottom: 2px solid #e0e0e0;
-    border-top: none;
-    position: relative; /* Use relative positioning instead of fixed */
-    background-color: #f8f9fa;
+  .tab-header {
+    position: relative;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     /* Safe area support for devices with notches */
     padding-top: max(0px, env(safe-area-inset-top));
   }
   
+  .tab-buttons {
+    border-bottom: none;
+    position: relative;
+    background-color: #f8f9fa;
+  }
+  
   .tab-content {
-    order: 2; /* Content below tabs on mobile */
-    padding: 0.75rem; /* Remove bottom padding since tabs aren't fixed */
+    padding: 0.75rem;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     flex: 1; /* Take remaining space */

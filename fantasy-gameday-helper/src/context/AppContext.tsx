@@ -11,6 +11,7 @@ const initialState: AppState = {
   gamedayData: null,
   exposureData: null,
   activeTab: 'gameday',
+  playerFilter: '',
   loading: false,
   exposureLoading: false,
   error: null,
@@ -115,6 +116,12 @@ function appReducer(state: AppState, action: AppAction): AppState {
         activeTab: action.payload,
       };
 
+    case 'SET_PLAYER_FILTER':
+      return {
+        ...state,
+        playerFilter: action.payload,
+      };
+
     case 'SET_LOADING':
       return {
         ...state,
@@ -180,6 +187,7 @@ interface AppContextType {
   setGamedayData: (data: GamedayData) => void;
   setExposureData: (data: ExposureData) => void;
   setActiveTab: (tab: 'gameday' | 'exposure') => void;
+  setPlayerFilter: (filter: string) => void;
   setLoading: (loading: boolean) => void;
   setExposureLoading: (loading: boolean) => void;
   setError: (error: string) => void;
@@ -300,6 +308,10 @@ export function AppProvider({ children }: AppProviderProps) {
     dispatch({ type: 'SET_ACTIVE_TAB', payload: tab });
   };
 
+  const setPlayerFilter = (filter: string) => {
+    dispatch({ type: 'SET_PLAYER_FILTER', payload: filter });
+  };
+
   const setLoading = (loading: boolean) => {
     dispatch({ type: 'SET_LOADING', payload: loading });
   };
@@ -337,6 +349,7 @@ export function AppProvider({ children }: AppProviderProps) {
     setGamedayData,
     setExposureData,
     setActiveTab,
+    setPlayerFilter,
     setLoading,
     setExposureLoading,
     setError,

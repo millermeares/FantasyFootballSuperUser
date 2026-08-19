@@ -1,6 +1,7 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useAppContext } from '../context';
 import { PlayerTable } from '../components/tables';
+import type { PlayerAllegiance } from '../types/app';
 
 interface GamedayViewProps {
   onPlayerCountClick: (playerId: string, leagues: string[]) => void;
@@ -8,6 +9,32 @@ interface GamedayViewProps {
 
 export function GamedayView({ onPlayerCountClick }: GamedayViewProps) {
   const { state } = useAppContext();
+
+  /**
+   * Filter players by the player filter (name or team abbreviation).
+   * Only applies when 2+ characters are entered.
+   */
+  const filterPlayers = useMemo(() => {
+    const query = state.playerFilter.trim().toLowerCase();
+    if (query.length < 2) return (players: PlayerAllegiance[]) => players;
+
+    return (players: PlayerAllegiance[]) =>
+      players.filter(
+        (p) =>
+          p.playerName.toLowerCase().includes(query) ||
+          p.team.toLowerCase().includes(query)
+      );
+  }, [state.playerFilter]);
+
+  const filteredCheeringFor = useMemo(
+    () => (state.gamedayData ? filterPlayers(state.gamedayData.cheeringFor) : []),
+    [state.gamedayData, filterPlayers]
+  );
+
+  const filteredCheeringAgainst = useMemo(
+    () => (state.gamedayData ? filterPlayers(state.gamedayData.cheeringAgainst) : []),
+    [state.gamedayData, filterPlayers]
+  );
 
   /**
    * Handle player count clicks to show league info popup
@@ -67,9 +94,9 @@ export function GamedayView({ onPlayerCountClick }: GamedayViewProps) {
           <div className="table-section">
             <PlayerTable
               title="Players to Cheer For"
-              players={state.gamedayData.cheeringFor}
+              players={filteredCheeringFor}
               onCountClick={handlePlayerCountClick}
-              emptyMessage="No players found in your selected teams' starting lineups"
+              emptyMessage={state.playerFilter.trim().length >= 2 ? "No matching players" : "No players found in your selected teams' starting lineups"}
             />
           </div>
 
@@ -77,9 +104,9 @@ export function GamedayView({ onPlayerCountClick }: GamedayViewProps) {
           <div className="table-section">
             <PlayerTable
               title="Players to Cheer Against"
-              players={state.gamedayData.cheeringAgainst}
+              players={filteredCheeringAgainst}
               onCountClick={handlePlayerCountClick}
-              emptyMessage="No opponent players found for your selected teams"
+              emptyMessage={state.playerFilter.trim().length >= 2 ? "No matching players" : "No opponent players found for your selected teams"}
             />
           </div>
         </div>

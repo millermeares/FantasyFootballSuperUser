@@ -54,6 +54,7 @@ export interface AppState {
   gamedayData: GamedayData | null;
   exposureData: ExposureData | null;
   activeTab: 'gameday' | 'exposure';
+  playerFilter: string;
   loading: boolean;
   exposureLoading: boolean; // Loading state specifically for exposure recalculations
   error: string | null;
@@ -75,6 +76,7 @@ export type AppAction =
   | { type: 'SET_GAMEDAY_DATA'; payload: GamedayData }
   | { type: 'SET_EXPOSURE_DATA'; payload: ExposureData }
   | { type: 'SET_ACTIVE_TAB'; payload: 'gameday' | 'exposure' }
+  | { type: 'SET_PLAYER_FILTER'; payload: string }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_EXPOSURE_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string }

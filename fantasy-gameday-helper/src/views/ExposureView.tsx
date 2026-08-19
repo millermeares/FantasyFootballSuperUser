@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useAppContext } from '../context';
 import { PlayerTable } from '../components/tables';
 
@@ -16,6 +16,19 @@ export function ExposureView({ onPlayerCountClick }: ExposureViewProps) {
   const handlePlayerCountClick = useCallback((playerId: string, leagues: string[]) => {
     onPlayerCountClick(playerId, leagues);
   }, [onPlayerCountClick]);
+
+  const filteredExposureReport = useMemo(() => {
+    if (!state.exposureData) return [];
+    const query = state.playerFilter.trim().toLowerCase();
+    if (query.length < 2) return state.exposureData.exposureReport;
+    return state.exposureData.exposureReport.filter(
+      (p) =>
+        p.playerName.toLowerCase().includes(query) ||
+        p.team.toLowerCase().includes(query)
+    );
+  }, [state.exposureData, state.playerFilter]);
+
+  const isFiltered = state.playerFilter.trim().length >= 2;
 
   // Show loading state if main data is being fetched
   if (state.loading) {
@@ -111,9 +124,9 @@ export function ExposureView({ onPlayerCountClick }: ExposureViewProps) {
           <PlayerTable
             title="Player Exposure Report"
             subtitle={`Ownership across ${state.exposureData.totalSelectedTeams} selected teams`}
-            players={state.exposureData.exposureReport}
+            players={filteredExposureReport}
             onCountClick={handlePlayerCountClick}
-            emptyMessage="No players found in your selected teams' rosters"
+            emptyMessage={isFiltered ? "No matching players" : "No players found in your selected teams' rosters"}
             displayMode="percentage"
             className="exposure-table"
           />
@@ -125,7 +138,11 @@ export function ExposureView({ onPlayerCountClick }: ExposureViewProps) {
             <div className="summary-stats">
               <div className="stat-item">
                 <span className="stat-label">Total Players:</span>
-                <span className="stat-value">{state.exposureData.exposureReport.length}</span>
+                <span className="stat-value">
+                  {isFiltered
+                    ? `${filteredExposureReport.length} of ${state.exposureData.exposureReport.length}`
+                    : state.exposureData.exposureReport.length}
+                </span>
               </div>
               <div className="stat-item">
                 <span className="stat-label">Selected Teams:</span>

@@ -1,6 +1,7 @@
 import { useAppContext } from '../../context';
 import { useEffect, useState, useCallback } from 'react';
 import { GamedayView, ExposureView } from '../../views';
+import { PlayerFilter } from '../forms';
 import './TabNavigation.css';
 
 interface TabNavigationProps {
@@ -58,34 +59,37 @@ export function TabNavigation({ onPlayerCountClick }: TabNavigationProps) {
       role="tablist"
       aria-label="Main navigation"
     >
-      {/* Tab buttons */}
-      <div className="tab-buttons" role="tablist">
-        <button
-          className={`tab-button ${state.activeTab === 'gameday' ? 'active' : ''}`}
-          onClick={() => handleTabClick('gameday')}
-          onKeyDown={(e) => handleKeyDown(e, 'gameday')}
-          aria-selected={state.activeTab === 'gameday'}
-          aria-controls="gameday-panel"
-          role="tab"
-          tabIndex={state.activeTab === 'gameday' ? 0 : -1}
-          data-tab="gameday"
-          id="gameday-tab"
-        >
-          <span>Gameday</span>
-        </button>
-        <button
-          className={`tab-button ${state.activeTab === 'exposure' ? 'active' : ''}`}
-          onClick={() => handleTabClick('exposure')}
-          onKeyDown={(e) => handleKeyDown(e, 'exposure')}
-          aria-selected={state.activeTab === 'exposure'}
-          aria-controls="exposure-panel"
-          role="tab"
-          tabIndex={state.activeTab === 'exposure' ? 0 : -1}
-          data-tab="exposure"
-          id="exposure-tab"
-        >
-          <span>Exposure</span>
-        </button>
+      {/* Tab header: buttons + player filter */}
+      <div className="tab-header">
+        <div className="tab-buttons" role="tablist">
+          <button
+            className={`tab-button ${state.activeTab === 'gameday' ? 'active' : ''}`}
+            onClick={() => handleTabClick('gameday')}
+            onKeyDown={(e) => handleKeyDown(e, 'gameday')}
+            aria-selected={state.activeTab === 'gameday'}
+            aria-controls="gameday-panel"
+            role="tab"
+            tabIndex={state.activeTab === 'gameday' ? 0 : -1}
+            data-tab="gameday"
+            id="gameday-tab"
+          >
+            <span>Gameday</span>
+          </button>
+          <button
+            className={`tab-button ${state.activeTab === 'exposure' ? 'active' : ''}`}
+            onClick={() => handleTabClick('exposure')}
+            onKeyDown={(e) => handleKeyDown(e, 'exposure')}
+            aria-selected={state.activeTab === 'exposure'}
+            aria-controls="exposure-panel"
+            role="tab"
+            tabIndex={state.activeTab === 'exposure' ? 0 : -1}
+            data-tab="exposure"
+            id="exposure-tab"
+          >
+            <span>Exposure</span>
+          </button>
+        </div>
+        <PlayerFilter />
       </div>
 
       {/* Tab content area */}
