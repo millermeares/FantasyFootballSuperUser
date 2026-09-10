@@ -3,7 +3,7 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from './App';
 import { AppProvider } from './context';
-// import * as SleeperApiService from './services/api/SleeperApiService';
+import { STORAGE_KEYS } from './context/persistence';
 
 // Mock the Sleeper API service
 const mockSleeperApi = {
@@ -12,6 +12,7 @@ const mockSleeperApi = {
   getLeagueRosters: vi.fn(),
   getLeagueMatchups: vi.fn(),
   getNflState: vi.fn(),
+  getWeekScores: vi.fn(),
 };
 
 vi.mock('./services/api/SleeperApiService', () => ({
@@ -48,7 +49,7 @@ const mockLeagues = [
     total_rosters: 10,
   },
   {
-    league_id: 'league_2', 
+    league_id: 'league_2',
     name: 'Test League 2',
     season: '2024',
     status: 'in_season' as const,
@@ -92,17 +93,61 @@ const mockMatchups = [
   },
 ];
 
+const TEAM_TOGGLE = /teams \(\d+\/\d+ selected\)/i;
+
+/**
+ * Render as a returning user and wait for the full league load to finish.
+ *
+ * App only fetches league data through its persisted-identifier effect, so a
+ * seeded identifier is what actually exercises the loading path. Waiting on the
+ * team filter (rather than just the greeting) proves rosters and matchups were
+ * really fetched - otherwise these regression tests pass vacuously, asserting
+ * that an load which never ran made no repeat calls.
+ */
+async function loadApp() {
+  const user = userEvent.setup();
+
+  render(
+    <AppProvider>
+      <App />
+    </AppProvider>
+  );
+
+  await waitFor(
+    () => {
+      expect(screen.getByText(/welcome back, test user/i)).toBeInTheDocument();
+    },
+    { timeout: 3000 }
+  );
+
+  // Guard against a vacuous run: the league load must have actually happened
+  await waitFor(
+    () => {
+      expect(screen.getByRole('button', { name: TEAM_TOGGLE })).toBeInTheDocument();
+    },
+    { timeout: 3000 }
+  );
+
+  expect(mockSleeperApi.getUserLeagues).toHaveBeenCalled();
+  expect(mockSleeperApi.getLeagueRosters).toHaveBeenCalled();
+
+  return user;
+}
+
 describe('App - Infinite Loop Regression Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockLocalStorage.getItem.mockReturnValue(null);
-    
+    mockLocalStorage.getItem.mockImplementation((key: string) =>
+      key === STORAGE_KEYS.USER_IDENTIFIER ? 'testuser' : null
+    );
+
     // Setup default API responses
     mockSleeperApi.getUser.mockResolvedValue(mockUser);
     mockSleeperApi.getUserLeagues.mockResolvedValue(mockLeagues);
     mockSleeperApi.getLeagueRosters.mockResolvedValue(mockRosters);
     mockSleeperApi.getLeagueMatchups.mockResolvedValue(mockMatchups);
     mockSleeperApi.getNflState.mockResolvedValue({ week: 10, season: '2024', season_type: 'regular' });
+    mockSleeperApi.getWeekScores.mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -110,27 +155,7 @@ describe('App - Infinite Loop Regression Tests', () => {
   });
 
   it('should not create infinite API call loop when user data is loaded', async () => {
-    const user = userEvent.setup();
-
-    render(
-      <AppProvider>
-        <App />
-      </AppProvider>
-    );
-
-    // Enter username to trigger data loading
-    const usernameInput = screen.getByPlaceholderText(/enter your sleeper username/i);
-    const submitButton = screen.getByRole('button', { name: /load teams/i });
-
-    await act(async () => {
-      await user.type(usernameInput, 'testuser');
-      await user.click(submitButton);
-    });
-
-    // Wait for initial data load to complete
-    await waitFor(() => {
-      expect(screen.getByText(/welcome back, test user/i)).toBeInTheDocument();
-    }, { timeout: 3000 });
+    await loadApp();
 
     // Reset call counts after initial load
     vi.clearAllMocks();
@@ -148,37 +173,26 @@ describe('App - Infinite Loop Regression Tests', () => {
   });
 
   it('should not trigger API calls when team selections change', async () => {
-    const user = userEvent.setup();
+    const user = await loadApp();
 
-    render(
-      <AppProvider>
-        <App />
-      </AppProvider>
-    );
-
-    // Load initial data
-    const usernameInput = screen.getByPlaceholderText(/enter your sleeper username/i);
-    const submitButton = screen.getByRole('button', { name: /load teams/i });
-
+    // Expand the team list so an individual team can be toggled
     await act(async () => {
-      await user.type(usernameInput, 'testuser');
-      await user.click(submitButton);
+      await user.click(screen.getByRole('button', { name: TEAM_TOGGLE }));
     });
 
-    // Wait for data to load
-    await waitFor(() => {
-      expect(screen.getByText(/welcome back, test user/i)).toBeInTheDocument();
-    });
-
-    // Clear API call counts after initial load - this is the main test
+    // Clear API call counts after initial load
     vi.clearAllMocks();
 
-    // Wait a bit to ensure no additional calls are made after initial load
+    // Toggling a team must recalculate from cached raw data, not refetch
+    await act(async () => {
+      await user.click(screen.getByRole('checkbox', { name: /test league 1/i }));
+    });
+
     await act(async () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
     });
 
-    // Verify NO API calls were made after initial load completed
+    // Verify NO API calls were made by the selection change
     expect(mockSleeperApi.getUser).not.toHaveBeenCalled();
     expect(mockSleeperApi.getUserLeagues).not.toHaveBeenCalled();
     expect(mockSleeperApi.getLeagueRosters).not.toHaveBeenCalled();
@@ -186,26 +200,7 @@ describe('App - Infinite Loop Regression Tests', () => {
   }, 10000);
 
   it('should only make API calls once per week change', async () => {
-    const user = userEvent.setup();
-
-    render(
-      <AppProvider>
-        <App />
-      </AppProvider>
-    );
-
-    // Load initial data
-    const usernameInput = screen.getByPlaceholderText(/enter your sleeper username/i);
-    const submitButton = screen.getByRole('button', { name: /load teams/i });
-
-    await act(async () => {
-      await user.type(usernameInput, 'testuser');
-      await user.click(submitButton);
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText(/welcome back, test user/i)).toBeInTheDocument();
-    });
+    const user = await loadApp();
 
     // Clear call counts after initial load
     vi.clearAllMocks();
@@ -234,31 +229,25 @@ describe('App - Infinite Loop Regression Tests', () => {
   });
 
   it('should handle rapid team selection changes without API call storms', async () => {
-    const user = userEvent.setup();
-
-    render(
-      <AppProvider>
-        <App />
-      </AppProvider>
-    );
-
-    // Load initial data
-    const usernameInput = screen.getByPlaceholderText(/enter your sleeper username/i);
-    const submitButton = screen.getByRole('button', { name: /load teams/i });
+    const user = await loadApp();
 
     await act(async () => {
-      await user.type(usernameInput, 'testuser');
-      await user.click(submitButton);
+      await user.click(screen.getByRole('button', { name: TEAM_TOGGLE }));
     });
 
-    await waitFor(() => {
-      expect(screen.getByText(/welcome back, test user/i)).toBeInTheDocument();
-    });
+    const leagueOne = screen.getByRole('checkbox', { name: /test league 1/i });
 
     // Clear API call counts after initial load
     vi.clearAllMocks();
 
-    // Simulate rapid state changes by waiting and checking no additional calls
+    // Rapid toggling should coalesce into local recalculations only
+    await act(async () => {
+      await user.click(leagueOne);
+      await user.click(leagueOne);
+      await user.click(leagueOne);
+      await user.click(leagueOne);
+    });
+
     await act(async () => {
       await new Promise(resolve => setTimeout(resolve, 1500));
     });
@@ -271,88 +260,47 @@ describe('App - Infinite Loop Regression Tests', () => {
   }, 10000);
 
   it('should maintain data consistency during team selection changes', async () => {
-    const user = userEvent.setup();
-
-    render(
-      <AppProvider>
-        <App />
-      </AppProvider>
-    );
-
-    // Load initial data
-    const usernameInput = screen.getByPlaceholderText(/enter your sleeper username/i);
-    const submitButton = screen.getByRole('button', { name: /load teams/i });
+    const user = await loadApp();
 
     await act(async () => {
-      await user.type(usernameInput, 'testuser');
-      await user.click(submitButton);
+      await user.click(screen.getByRole('button', { name: TEAM_TOGGLE }));
+    });
+
+    // Deselecting one of two teams leaves the other selected and loaded
+    await act(async () => {
+      await user.click(screen.getByRole('checkbox', { name: /test league 1/i }));
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/welcome back, test user/i)).toBeInTheDocument();
-    });
-
-    // For this test, we just need to verify the app loads without infinite loops
-    // The "No gameday data available" message is acceptable in test environment
-    // since we're primarily testing the infinite loop prevention
-    
-    // Wait for loading to complete
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      expect(
+        screen.getByRole('button', { name: /teams \(1\/2 selected\)/i })
+      ).toBeInTheDocument();
     });
 
     // Verify the app is in a stable state (user is loaded, no loading spinner)
     expect(screen.getByText(/welcome back, test user/i)).toBeInTheDocument();
     expect(screen.queryByText('Loading your fantasy data...')).not.toBeInTheDocument();
-    
-    // The main goal: no infinite API calls should have occurred
-    // This is already tested by the other tests, so this test passes if we get here
-    expect(true).toBe(true);
+
+    // Both teams remain listed; only the selection changed
+    expect(screen.getByText('Test League 1')).toBeInTheDocument();
+    expect(screen.getByText('Test League 2')).toBeInTheDocument();
   }, 10000);
-});
+
   it('REGRESSION: should prevent infinite loop bug - API calls should be bounded', async () => {
     /**
      * This test specifically prevents the regression of the infinite loop bug
      * where useEffect dependencies caused endless API calls.
-     * 
+     *
      * Bug pattern:
      * 1. useEffect triggers on gamedayData change
-     * 2. recalculateGamedayData calls loadLeagueData  
+     * 2. recalculateGamedayData calls loadLeagueData
      * 3. loadLeagueData updates gamedayData
      * 4. Loop back to step 1 infinitely
      */
-    const user = userEvent.setup();
-
-    render(
-      <AppProvider>
-        <App />
-      </AppProvider>
-    );
-
-    // Track API call counts throughout the test
-    let initialCallCounts = {
-      getUser: 0,
-      getUserLeagues: 0, 
-      getLeagueRosters: 0,
-      getLeagueMatchups: 0,
-    };
-
-    // Load user data
-    const usernameInput = screen.getByPlaceholderText(/enter your sleeper username/i);
-    const submitButton = screen.getByRole('button', { name: /load teams/i });
-
-    await act(async () => {
-      await user.type(usernameInput, 'testuser');
-      await user.click(submitButton);
-    });
-
-    // Wait for initial load
-    await waitFor(() => {
-      expect(screen.getByText(/welcome back, test user/i)).toBeInTheDocument();
-    });
+    await loadApp();
 
     // Record call counts after initial load
-    initialCallCounts = {
+    const initialCallCounts = {
       getUser: mockSleeperApi.getUser.mock.calls.length,
       getUserLeagues: mockSleeperApi.getUserLeagues.mock.calls.length,
       getLeagueRosters: mockSleeperApi.getLeagueRosters.mock.calls.length,
@@ -376,3 +324,4 @@ describe('App - Infinite Loop Regression Tests', () => {
     expect(mockSleeperApi.getLeagueRosters.mock.calls.length).toBeLessThan(10); // 2 leagues max
     expect(mockSleeperApi.getLeagueMatchups.mock.calls.length).toBeLessThan(10); // 2 leagues max
   });
+});
