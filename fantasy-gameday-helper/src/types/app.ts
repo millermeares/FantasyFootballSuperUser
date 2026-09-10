@@ -57,6 +57,32 @@ export interface ExposureData {
   totalSelectedTeams: number;
 }
 
+/**
+ * A group of games that kick off together - what fantasy players call a slate
+ * ("Sunday early", "Sunday night", ...). Inferred from kickoff times rather
+ * than defined up front, so odd windows (London, Thanksgiving, a Wednesday
+ * opener) come through on their own without any schedule knowledge baked in.
+ */
+export interface Slate {
+  /** Stable within a week, derived from the slate's first kickoff. */
+  id: string;
+  /** Day and kickoff in the viewer's timezone, e.g. "Sun 1:00 PM". */
+  label: string;
+  /** Epoch milliseconds of the earliest kickoff in the slate. */
+  startTime: number;
+  /** Every distinct kickoff in the slate, ascending. Usually one, sometimes two. */
+  kickoffTimes: number[];
+  gameCount: number;
+  /** NFL team abbreviations playing in this slate. */
+  teams: string[];
+}
+
+export interface SlateData {
+  slates: Slate[];
+  /** NFL team abbreviation -> the slate its game belongs to. */
+  teamSlateIds: Record<string, string>;
+}
+
 export interface GamedayData {
   cheeringFor: PlayerAllegiance[];
   cheeringAgainst: PlayerAllegiance[];
@@ -81,6 +107,10 @@ export interface AppState {
   exposureData: ExposureData | null;
   activeTab: 'gameday' | 'exposure';
   playerFilter: string;
+  /** Kickoff groupings for the selected week; null when they could not be loaded. */
+  slateData: SlateData | null;
+  /** Slates whose players are shown. Reset to every slate when the week changes. */
+  selectedSlateIds: string[];
   loading: boolean;
   exposureLoading: boolean; // Loading state specifically for exposure recalculations
   error: string | null;
@@ -104,6 +134,8 @@ export type AppAction =
   | { type: 'SET_EXPOSURE_DATA'; payload: ExposureData }
   | { type: 'SET_ACTIVE_TAB'; payload: 'gameday' | 'exposure' }
   | { type: 'SET_PLAYER_FILTER'; payload: string }
+  | { type: 'SET_SLATE_DATA'; payload: SlateData | null }
+  | { type: 'TOGGLE_SLATE'; payload: string } // slate id
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_EXPOSURE_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string }

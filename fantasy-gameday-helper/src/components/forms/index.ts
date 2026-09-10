@@ -5,3 +5,4 @@ export type { default as WeekSelectorProps } from './WeekSelector';
 export { TeamFilter } from './TeamFilter';
 export type { default as TeamFilterProps } from './TeamFilter';
 export { PlayerFilter } from './PlayerFilter';
+export { SlateFilter } from './SlateFilter';

@@ -1,10 +1,11 @@
 import { useReducer, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import type { AppState, AppAction, GamedayData, ExposureData, PopupPlayer, PopupContext, UserTeam } from '../types';
+import type { AppState, AppAction, GamedayData, ExposureData, PopupPlayer, PopupContext, UserTeam, SlateData } from '../types';
 import type { SleeperUser } from '../types/sleeper';
 import { AppContext } from './AppContextInstance';
 import type { AppContextType } from './AppContextInstance';
 import { STORAGE_KEYS } from './persistence';
+import { allSlateIds } from '../services/ScheduleService';
 
 // Initial state
 const initialState: AppState = {
@@ -15,6 +16,8 @@ const initialState: AppState = {
   exposureData: null,
   activeTab: 'gameday',
   playerFilter: '',
+  slateData: null,
+  selectedSlateIds: [],
   loading: false,
   exposureLoading: false,
   error: null,
@@ -43,6 +46,8 @@ function appReducer(state: AppState, action: AppAction): AppState {
         userTeams: [],
         gamedayData: null,
         exposureData: null,
+        slateData: null,
+        selectedSlateIds: [],
         exposureLoading: false,
         error: null,
         popupData: {
@@ -126,6 +131,25 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         playerFilter: action.payload,
       };
+
+    // A new week brings a new set of slates, so any previous selection no
+    // longer refers to anything: start over with everything shown.
+    case 'SET_SLATE_DATA':
+      return {
+        ...state,
+        slateData: action.payload,
+        selectedSlateIds: allSlateIds(action.payload),
+      };
+
+    case 'TOGGLE_SLATE': {
+      const isSelected = state.selectedSlateIds.includes(action.payload);
+      return {
+        ...state,
+        selectedSlateIds: isSelected
+          ? state.selectedSlateIds.filter((id) => id !== action.payload)
+          : [...state.selectedSlateIds, action.payload],
+      };
+    }
 
     case 'SET_LOADING':
       return {
@@ -285,6 +309,14 @@ export function AppProvider({ children }: AppProviderProps) {
     dispatch({ type: 'SET_PLAYER_FILTER', payload: filter });
   };
 
+  const setSlateData = (data: SlateData | null) => {
+    dispatch({ type: 'SET_SLATE_DATA', payload: data });
+  };
+
+  const toggleSlate = (slateId: string) => {
+    dispatch({ type: 'TOGGLE_SLATE', payload: slateId });
+  };
+
   const setLoading = (loading: boolean) => {
     dispatch({ type: 'SET_LOADING', payload: loading });
   };
@@ -327,6 +359,8 @@ export function AppProvider({ children }: AppProviderProps) {
     setExposureData,
     setActiveTab,
     setPlayerFilter,
+    setSlateData,
+    toggleSlate,
     setLoading,
     setExposureLoading,
     setError,

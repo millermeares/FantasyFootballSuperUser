@@ -1,11 +1,19 @@
 import axios, { AxiosError } from 'axios';
 import type { AxiosInstance, AxiosResponse } from 'axios';
-import type { 
-  SleeperUser, 
-  SleeperLeague, 
-  SleeperRoster, 
-  SleeperMatchup 
+import type {
+  SleeperUser,
+  SleeperLeague,
+  SleeperRoster,
+  SleeperMatchup,
+  SleeperGameScore
 } from '../../types/sleeper';
+
+/**
+ * The scores feed lives outside the versioned API, so requests to it pass an
+ * absolute URL and bypass `baseURL` while keeping the retry and rate limiting
+ * behaviour of the shared axios instance.
+ */
+const SCORES_BASE_URL = 'https://api.sleeper.app/scores/nfl';
 
 /**
  * Configuration for the Sleeper API service
@@ -288,6 +296,34 @@ export class SleeperApiService {
 
     return this.executeWithRetry(() =>
       this.axiosInstance.get<SleeperUser[]>(`/league/${encodeURIComponent(leagueId.trim())}/users`)
+    );
+  }
+
+  /**
+   * Get every NFL game for a week, including its kickoff time. Scheduled weeks
+   * are populated well before kickoff, so this works for future weeks too.
+   * @param season - NFL season year (e.g. "2025")
+   * @param week - NFL week number
+   * @param seasonType - "regular", "post" or "pre"
+   * @returns Promise resolving to array of SleeperGameScore objects
+   */
+  async getWeekScores(
+    season: string,
+    week: number,
+    seasonType: string = 'regular'
+  ): Promise<SleeperGameScore[]> {
+    if (!season || season.trim() === '') {
+      throw new SleeperApiError('Season cannot be empty', 400, false);
+    }
+
+    if (!Number.isInteger(week) || week < 1 || week > 22) {
+      throw new SleeperApiError('Week must be an integer between 1 and 22', 400, false);
+    }
+
+    return this.executeWithRetry(() =>
+      this.axiosInstance.get<SleeperGameScore[]>(
+        `${SCORES_BASE_URL}/${encodeURIComponent(seasonType)}/${encodeURIComponent(season.trim())}/${week}`
+      )
     );
   }
 

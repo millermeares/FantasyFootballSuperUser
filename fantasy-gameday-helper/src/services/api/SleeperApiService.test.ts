@@ -52,6 +52,18 @@ describe('SleeperApiService', () => {
       });
     });
 
+    describe('getWeekScores', () => {
+      it('should throw error for empty season', async () => {
+        await expect(service.getWeekScores('', 1)).rejects.toThrow('Season cannot be empty');
+      });
+
+      it('should throw error for invalid week number', async () => {
+        await expect(service.getWeekScores('2025', 0)).rejects.toThrow('Week must be an integer between 1 and 22');
+        await expect(service.getWeekScores('2025', 23)).rejects.toThrow('Week must be an integer between 1 and 22');
+        await expect(service.getWeekScores('2025', 1.5)).rejects.toThrow('Week must be an integer between 1 and 22');
+      });
+    });
+
     describe('getLeagueUsers', () => {
       it('should throw error for empty leagueId', async () => {
         await expect(service.getLeagueUsers('')).rejects.toThrow('League ID cannot be empty');

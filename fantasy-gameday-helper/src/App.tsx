@@ -4,6 +4,7 @@ import { UserIdentifierInput, WeekSelector, TeamFilter } from './components/form
 import { LeagueInfoPopup, TabNavigation } from './components/ui';
 import { getSleeperApiService } from './services/api/SleeperApiService';
 import { playerAnalysisService } from './services/PlayerAnalysisService';
+import { buildSlateData } from './services/ScheduleService';
 
 import type { SleeperRoster, SleeperMatchup, SleeperLeague } from './types/sleeper';
 import type { UserTeam, AnalysisInput } from './types/app';
@@ -18,6 +19,7 @@ function App() {
     setUserTeams,
     setGamedayData,
     setExposureData,
+    setSlateData,
     setLoading,
     setExposureLoading,
     setError, 
@@ -76,6 +78,21 @@ function App() {
   }, [sleeperApi, setUser, setWeek, setLoading, setError, clearError, state.selectedWeek]);
 
   /**
+   * Load the week's kickoff times and group them into slates. Slate filtering is
+   * a convenience, so a failure here leaves the gameday table unfiltered rather
+   * than failing the whole load.
+   */
+  const loadSlateData = useCallback(async (season: string, week: number) => {
+    try {
+      const games = await sleeperApi.getWeekScores(season, week);
+      return buildSlateData(games);
+    } catch (error) {
+      console.warn(`Could not load kickoff times for week ${week}:`, error);
+      return null;
+    }
+  }, [sleeperApi]);
+
+  /**
    * Load league data and generate gameday analysis with specific week
    * Requirements: 1.2, 2.1 - Load team data and set up team filter
    */
@@ -86,9 +103,14 @@ function App() {
 
       console.log(`Loading league data for user ${userId}, season ${season}, week ${week}`);
 
-      // Get user's leagues
-      const leagues = await sleeperApi.getUserLeagues(userId, season);
-      
+      // Get user's leagues alongside the week's kickoff times, which are independent
+      const [leagues, slateData] = await Promise.all([
+        sleeperApi.getUserLeagues(userId, season),
+        loadSlateData(season, week)
+      ]);
+
+      setSlateData(slateData);
+
       if (leagues.length === 0) {
         setError('No leagues found for this user in the current season');
         return;
@@ -189,7 +211,7 @@ function App() {
     } finally {
       setLoading(false);
     }
-  }, [sleeperApi, setUserTeams, setLoading, setError, clearError, setGamedayData]);
+  }, [sleeperApi, loadSlateData, setUserTeams, setSlateData, setLoading, setError, clearError, setGamedayData]);
 
   /**
    * Load league data and generate gameday analysis (uses current selected week)

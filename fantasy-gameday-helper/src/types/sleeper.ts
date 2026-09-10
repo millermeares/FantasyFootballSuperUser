@@ -34,6 +34,25 @@ export interface SleeperMatchup {
   custom_points: number | null;
 }
 
+/**
+ * One NFL game from Sleeper's scores feed. Populated for future weeks, so it is
+ * the source of kickoff times before any game has been played.
+ */
+export interface SleeperGameScore {
+  game_id: string;
+  week: number;
+  status: string;
+  /** Kickoff as epoch milliseconds. Null on games Sleeper has not scheduled yet. */
+  start_time: number | null;
+  metadata?: {
+    home_team?: string | null;
+    away_team?: string | null;
+    /** Kickoff as an ISO timestamp; `start_time` is preferred. */
+    date_time?: string | null;
+    [key: string]: unknown;
+  };
+}
+
 export interface SleeperPlayer {
   player_id: string;
   full_name: string;

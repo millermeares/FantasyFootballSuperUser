@@ -8,6 +8,7 @@ import type {
   PopupPlayer,
   PopupContext,
   UserTeam,
+  SlateData,
 } from '../types';
 import type { SleeperUser } from '../types/sleeper';
 
@@ -27,6 +28,8 @@ export interface AppContextType {
   setExposureData: (data: ExposureData) => void;
   setActiveTab: (tab: 'gameday' | 'exposure') => void;
   setPlayerFilter: (filter: string) => void;
+  setSlateData: (data: SlateData | null) => void;
+  toggleSlate: (slateId: string) => void;
   setLoading: (loading: boolean) => void;
   setExposureLoading: (loading: boolean) => void;
   setError: (error: string) => void;

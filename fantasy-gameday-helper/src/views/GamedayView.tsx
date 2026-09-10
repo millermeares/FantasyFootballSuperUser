@@ -2,8 +2,10 @@ import { useCallback, useMemo } from 'react';
 import { useAppContext } from '../context';
 import { AggregateTable } from '../components/tables';
 import type { AllegianceSide } from '../components/tables';
+import { SlateFilter } from '../components/forms';
 import { aggregateAllegiances } from '../services/PlayerAnalysisService';
-import type { PlayerAggregate } from '../types/app';
+import { slateIdForTeam } from '../services/ScheduleService';
+import type { PlayerAggregate, SlateData } from '../types/app';
 
 /**
  * Filter players by name or team abbreviation.
@@ -17,6 +19,21 @@ function filterPlayers(players: PlayerAggregate[], query: string | null): Player
       p.playerName.toLowerCase().includes(query) ||
       p.team.toLowerCase().includes(query)
   );
+}
+
+/** How many players fall in each slate, for the counts on the slate chips. */
+function countPlayersBySlate(
+  players: PlayerAggregate[],
+  slateData: SlateData
+): Record<string, number> {
+  const counts: Record<string, number> = {};
+
+  for (const player of players) {
+    const slateId = slateIdForTeam(player.team, slateData);
+    counts[slateId] = (counts[slateId] ?? 0) + 1;
+  }
+
+  return counts;
 }
 
 export function GamedayView() {
@@ -43,6 +60,26 @@ export function GamedayView() {
     () => filterPlayers(aggregate, filterQuery),
     [aggregate, filterQuery]
   );
+
+  const { slateData, selectedSlateIds } = state;
+
+  // Chip counts describe the whole week, so they hold still while you type in
+  // the name filter or toggle slates
+  const playerCountsBySlate = useMemo(
+    () => (slateData ? countPlayersBySlate(aggregate, slateData) : {}),
+    [aggregate, slateData]
+  );
+
+  // Without kickoff times there is nothing to narrow by, so every player shows
+  const visiblePlayers = useMemo(() => {
+    if (!slateData || slateData.slates.length === 0) return filteredPlayers;
+
+    return filteredPlayers.filter((player) =>
+      selectedSlateIds.includes(slateIdForTeam(player.team, slateData))
+    );
+  }, [filteredPlayers, slateData, selectedSlateIds]);
+
+  const hiddenBySlateFilter = filteredPlayers.length > 0 && visiblePlayers.length === 0;
 
   /**
    * Show the leagues behind whichever count was clicked. Each side keeps its
@@ -99,15 +136,19 @@ export function GamedayView() {
 
   return (
     <div className="gameday-view">
+      <SlateFilter playerCounts={playerCountsBySlate} />
+
       <div className="player-tables-section">
         <AggregateTable
           title="Gameday Allegiances"
-          players={filteredPlayers}
+          players={visiblePlayers}
           onCountClick={handleCountClick}
           emptyMessage={
-            trimmedFilter.length >= 2
-              ? 'No matching players'
-              : 'No players found in your selected teams or their matchups'
+            hiddenBySlateFilter
+              ? 'No players in the selected game times'
+              : trimmedFilter.length >= 2
+                ? 'No matching players'
+                : 'No players found in your selected teams or their matchups'
           }
         />
       </div>
