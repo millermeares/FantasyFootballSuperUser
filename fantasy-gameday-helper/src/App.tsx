@@ -138,8 +138,11 @@ function App() {
           
           rostersMap.set(league.league_id, validRosters);
 
-          // Find user's roster in this league
-          const userRoster = validRosters.find(roster => roster.owner_id === userId);
+          // Find user's roster in this league. Co-managers share a team, so the
+          // user may be listed in co_owners rather than as the primary owner.
+          const userRoster = validRosters.find(roster =>
+            roster.owner_id === userId || roster.co_owners?.includes(userId)
+          );
           if (userRoster && userRoster.players && Array.isArray(userRoster.players)) {
             console.log(`Found user roster in ${league.name}: roster_id ${userRoster.roster_id}`);
             

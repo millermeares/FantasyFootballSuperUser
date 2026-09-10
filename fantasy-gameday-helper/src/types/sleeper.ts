@@ -20,7 +20,10 @@ export interface SleeperLeague {
 
 export interface SleeperRoster {
   roster_id: number;
-  owner_id: string;
+  /** Primary manager. Null on orphan teams that no one has claimed. */
+  owner_id: string | null;
+  /** Additional managers who share this team. Absent or null when there are none. */
+  co_owners?: string[] | null;
   players: string[];
   starters: string[];
 }
