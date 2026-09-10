@@ -24,6 +24,23 @@ export interface PlayerAllegiance {
   leagues: string[]; // League names where this player appears
 }
 
+/**
+ * A single player rolled up across every selected team: how often you start
+ * them, how often you face them, and both the sum and the net of the two.
+ */
+export interface PlayerAggregate {
+  playerId: string;
+  playerName: string;
+  position: string;
+  team: string;
+  forCount: number; // Teams where the player is in your starting lineup
+  againstCount: number; // Teams where the player is in your opponent's lineup
+  totalCount: number; // forCount + againstCount - how much this player matters to you
+  netCount: number; // forCount - againstCount
+  forLeagues: string[]; // League names where you start this player
+  againstLeagues: string[]; // League names where you face this player
+}
+
 export interface PlayerExposure {
   playerId: string;
   playerName: string;
@@ -46,6 +63,15 @@ export interface GamedayData {
   userTeams: UserTeam[];
 }
 
+/**
+ * Which side of a player's allegiance the league popup is describing.
+ * An aggregate row can be opened from either its "for" or its "against" count,
+ * and each side has its own league list. Rows with a single count use 'total'.
+ */
+export type PopupContext = 'for' | 'against' | 'total';
+
+export type PopupPlayer = PlayerAllegiance | PlayerExposure | PlayerAggregate;
+
 // State Management
 export interface AppState {
   user: import('./sleeper').SleeperUser | null;
@@ -60,8 +86,9 @@ export interface AppState {
   error: string | null;
   popupData: {
     isOpen: boolean;
-    player: PlayerAllegiance | PlayerExposure | null;
+    player: PopupPlayer | null;
     leagues: string[];
+    context: PopupContext;
   };
 }
 
@@ -83,6 +110,6 @@ export type AppAction =
   | { type: 'CLEAR_ERROR' }
   | {
       type: 'OPEN_POPUP';
-      payload: { player: PlayerAllegiance | PlayerExposure; leagues: string[] };
+      payload: { player: PopupPlayer; leagues: string[]; context: PopupContext };
     }
   | { type: 'CLOSE_POPUP' };

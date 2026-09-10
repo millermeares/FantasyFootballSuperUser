@@ -5,6 +5,7 @@ import { PlayerFilter } from '../forms';
 import './TabNavigation.css';
 
 interface TabNavigationProps {
+  /** Exposure rows report clicks upward; the gameday table opens its own popup. */
   onPlayerCountClick: (playerId: string, leagues: string[]) => void;
 }
 
@@ -28,8 +29,8 @@ export function TabNavigation({ onPlayerCountClick }: TabNavigationProps) {
   };
 
   /**
-   * Handle player count clicks from GamedayView
-   * Requirements: 3.4, 4.4 - League info popup functionality
+   * Handle player count clicks from ExposureView
+   * Requirements: 11.4 - League info popup functionality
    */
   const handlePlayerCountClick = useCallback((playerId: string, leagues: string[]) => {
     onPlayerCountClick(playerId, leagues);
@@ -105,7 +106,7 @@ export function TabNavigation({ onPlayerCountClick }: TabNavigationProps) {
             role="region"
             aria-label="Gameday analysis content"
           >
-            <GamedayView onPlayerCountClick={handlePlayerCountClick} />
+            <GamedayView />
           </div>
         )}
         

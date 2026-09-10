@@ -1,6 +1,6 @@
 import { useReducer, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import type { AppState, AppAction, GamedayData, ExposureData, PlayerAllegiance, PlayerExposure, UserTeam } from '../types';
+import type { AppState, AppAction, GamedayData, ExposureData, PopupPlayer, PopupContext, UserTeam } from '../types';
 import type { SleeperUser } from '../types/sleeper';
 import { AppContext } from './AppContextInstance';
 import type { AppContextType } from './AppContextInstance';
@@ -22,6 +22,7 @@ const initialState: AppState = {
     isOpen: false,
     player: null,
     leagues: [],
+    context: 'total',
   },
 };
 
@@ -48,6 +49,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
           isOpen: false,
           player: null,
           leagues: [],
+          context: 'total',
         },
       };
 
@@ -157,6 +159,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
           isOpen: true,
           player: action.payload.player,
           leagues: action.payload.leagues,
+          context: action.payload.context,
         },
       };
 
@@ -167,6 +170,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
           isOpen: false,
           player: null,
           leagues: [],
+          context: 'total',
         },
       };
 
@@ -297,8 +301,12 @@ export function AppProvider({ children }: AppProviderProps) {
     dispatch({ type: 'CLEAR_ERROR' });
   };
 
-  const openPopup = (player: PlayerAllegiance | PlayerExposure, leagues: string[]) => {
-    dispatch({ type: 'OPEN_POPUP', payload: { player, leagues } });
+  const openPopup = (
+    player: PopupPlayer,
+    leagues: string[],
+    context: PopupContext
+  ) => {
+    dispatch({ type: 'OPEN_POPUP', payload: { player, leagues, context } });
   };
 
   const closePopup = () => {

@@ -149,7 +149,7 @@
 }
 
 /* High contrast mode improvements */
-@media (prefers-contrast: high) {
+@media (prefers-contrast: more) {
   .player-table,
   .team-filter,
   .user-identifier-input,
@@ -177,11 +177,14 @@
     padding: 0.5rem 0;
   }
 
+  /*
+   * Counts are the whole point of the tables, so they stay on the page. Each
+   * table's own print block flattens them to ink-friendly outlines.
+   */
   .controls-section,
   .bulk-actions,
   .refresh-week-button,
-  .change-user-button,
-  .count-button {
+  .change-user-button {
     display: none !important;
   }
 

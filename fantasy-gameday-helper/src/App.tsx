@@ -253,18 +253,18 @@ function App() {
   }, [setGamedayData, setExposureData, setExposureLoading, setError]);
 
   /**
-   * Handle player count clicks to show league info popup
-   * Requirements: 3.4, 4.4, 11.4 - League info popup functionality
+   * Handle exposure count clicks to show league info popup.
+   * The gameday table opens the popup itself, since each of its rows carries a
+   * separate league list per allegiance side.
+   * Requirements: 11.4 - League info popup functionality
    */
   const handlePlayerCountClick = useCallback((playerId: string, leagues: string[]) => {
-    const player = state.gamedayData?.cheeringFor.find(p => p.playerId === playerId) ||
-                   state.gamedayData?.cheeringAgainst.find(p => p.playerId === playerId) ||
-                   state.exposureData?.exposureReport.find(p => p.playerId === playerId);
-    
+    const player = state.exposureData?.exposureReport.find(p => p.playerId === playerId);
+
     if (player) {
-      openPopup(player, leagues);
+      openPopup(player, leagues, 'total');
     }
-  }, [state.gamedayData, state.exposureData, openPopup]);
+  }, [state.exposureData, openPopup]);
 
   /**
    * Initialize app on mount
@@ -399,6 +399,7 @@ function App() {
           isOpen={state.popupData.isOpen}
           player={state.popupData.player}
           leagues={state.popupData.leagues}
+          context={state.popupData.context}
           onClose={closePopup}
         />
       </main>

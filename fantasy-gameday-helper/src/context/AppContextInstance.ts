@@ -5,8 +5,8 @@ import type {
   AppAction,
   GamedayData,
   ExposureData,
-  PlayerAllegiance,
-  PlayerExposure,
+  PopupPlayer,
+  PopupContext,
   UserTeam,
 } from '../types';
 import type { SleeperUser } from '../types/sleeper';
@@ -31,7 +31,11 @@ export interface AppContextType {
   setExposureLoading: (loading: boolean) => void;
   setError: (error: string) => void;
   clearError: () => void;
-  openPopup: (player: PlayerAllegiance | PlayerExposure, leagues: string[]) => void;
+  openPopup: (
+    player: PopupPlayer,
+    leagues: string[],
+    context: PopupContext
+  ) => void;
   closePopup: () => void;
 }
 

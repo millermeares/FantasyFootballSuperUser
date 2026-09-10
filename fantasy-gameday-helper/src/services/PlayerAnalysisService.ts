@@ -1,13 +1,82 @@
 // Types imported via app.ts AnalysisInput interface
-import type { 
-  UserTeam, 
-  PlayerAllegiance, 
+import type {
+  UserTeam,
+  PlayerAllegiance,
+  PlayerAggregate,
   GamedayData,
   AnalysisInput,
   PlayerExposure,
   ExposureData
 } from '../types/app';
 import { PlayerService } from './PlayerService';
+
+/**
+ * Roll the two allegiance lists up into one row per player, so a single table
+ * can show how often you start a player alongside how often you face them.
+ *
+ * A player can legitimately appear on both sides: you start them in one league
+ * while an opponent starts them in another. The missing side is simply 0.
+ *
+ * Sorted by total appearances (descending) so the players who most affect your
+ * day come first, then by net so a player you mostly start outranks one you
+ * mostly face, then by name for a stable order.
+ */
+export function aggregateAllegiances(
+  cheeringFor: PlayerAllegiance[],
+  cheeringAgainst: PlayerAllegiance[]
+): PlayerAggregate[] {
+  const byPlayerId = new Map<string, PlayerAggregate>();
+
+  const upsert = (player: PlayerAllegiance): PlayerAggregate => {
+    const existing = byPlayerId.get(player.playerId);
+    if (existing) return existing;
+
+    const created: PlayerAggregate = {
+      playerId: player.playerId,
+      playerName: player.playerName,
+      position: player.position,
+      team: player.team,
+      forCount: 0,
+      againstCount: 0,
+      totalCount: 0,
+      netCount: 0,
+      forLeagues: [],
+      againstLeagues: []
+    };
+    byPlayerId.set(player.playerId, created);
+    return created;
+  };
+
+  for (const player of cheeringFor) {
+    const row = upsert(player);
+    row.forCount = player.count;
+    row.forLeagues = [...player.leagues];
+  }
+
+  for (const player of cheeringAgainst) {
+    const row = upsert(player);
+    row.againstCount = player.count;
+    row.againstLeagues = [...player.leagues];
+  }
+
+  const rows = [...byPlayerId.values()];
+  for (const row of rows) {
+    row.totalCount = row.forCount + row.againstCount;
+    row.netCount = row.forCount - row.againstCount;
+  }
+
+  return rows.sort((a, b) => {
+    if (b.totalCount !== a.totalCount) {
+      return b.totalCount - a.totalCount;
+    }
+
+    if (b.netCount !== a.netCount) {
+      return b.netCount - a.netCount;
+    }
+
+    return a.playerName.localeCompare(b.playerName);
+  });
+}
 
 /**
  * Internal structure for tracking player counts

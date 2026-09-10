@@ -1,17 +1,15 @@
 import { useCallback, useMemo } from 'react';
 import { useAppContext } from '../context';
-import { PlayerTable } from '../components/tables';
-import type { PlayerAllegiance } from '../types/app';
-
-interface GamedayViewProps {
-  onPlayerCountClick: (playerId: string, leagues: string[]) => void;
-}
+import { AggregateTable } from '../components/tables';
+import type { AllegianceSide } from '../components/tables';
+import { aggregateAllegiances } from '../services/PlayerAnalysisService';
+import type { PlayerAggregate } from '../types/app';
 
 /**
  * Filter players by name or team abbreviation.
  * A null query means no filtering is applied.
  */
-function filterPlayers(players: PlayerAllegiance[], query: string | null): PlayerAllegiance[] {
+function filterPlayers(players: PlayerAggregate[], query: string | null): PlayerAggregate[] {
   if (query === null) return players;
 
   return players.filter(
@@ -21,30 +19,42 @@ function filterPlayers(players: PlayerAllegiance[], query: string | null): Playe
   );
 }
 
-export function GamedayView({ onPlayerCountClick }: GamedayViewProps) {
-  const { state } = useAppContext();
+export function GamedayView() {
+  const { state, openPopup } = useAppContext();
+
+  // One row per player, derived from the two allegiance lists rather than
+  // stored, so it can never fall out of step with them.
+  const aggregate = useMemo(
+    () =>
+      state.gamedayData
+        ? aggregateAllegiances(
+            state.gamedayData.cheeringFor,
+            state.gamedayData.cheeringAgainst
+          )
+        : [],
+    [state.gamedayData]
+  );
 
   // The player filter only applies when 2+ characters are entered
   const trimmedFilter = state.playerFilter.trim();
   const filterQuery = trimmedFilter.length >= 2 ? trimmedFilter.toLowerCase() : null;
 
-  const filteredCheeringFor = useMemo(
-    () => (state.gamedayData ? filterPlayers(state.gamedayData.cheeringFor, filterQuery) : []),
-    [state.gamedayData, filterQuery]
-  );
-
-  const filteredCheeringAgainst = useMemo(
-    () => (state.gamedayData ? filterPlayers(state.gamedayData.cheeringAgainst, filterQuery) : []),
-    [state.gamedayData, filterQuery]
+  const filteredPlayers = useMemo(
+    () => filterPlayers(aggregate, filterQuery),
+    [aggregate, filterQuery]
   );
 
   /**
-   * Handle player count clicks to show league info popup
-   * Requirements: 3.4, 4.4 - League info popup functionality
+   * Show the leagues behind whichever count was clicked. Each side keeps its
+   * own league list, so the popup needs to know which one it is describing.
    */
-  const handlePlayerCountClick = useCallback((playerId: string, leagues: string[]) => {
-    onPlayerCountClick(playerId, leagues);
-  }, [onPlayerCountClick]);
+  const handleCountClick = useCallback(
+    (player: PlayerAggregate, side: AllegianceSide) => {
+      const leagues = side === 'for' ? player.forLeagues : player.againstLeagues;
+      openPopup(player, leagues, side);
+    },
+    [openPopup]
+  );
 
   // Show loading state if data is being fetched
   if (state.loading) {
@@ -79,7 +89,7 @@ export function GamedayView({ onPlayerCountClick }: GamedayViewProps) {
         <div className="empty-gameday-state">
           <h3>No gameday data available</h3>
           <p>
-            Make sure you have teams in active leagues for the selected week, 
+            Make sure you have teams in active leagues for the selected week,
             and that matchups are available.
           </p>
         </div>
@@ -89,29 +99,17 @@ export function GamedayView({ onPlayerCountClick }: GamedayViewProps) {
 
   return (
     <div className="gameday-view">
-      {/* Player tables section */}
       <div className="player-tables-section">
-        <div className="tables-container">
-          {/* Cheering For table */}
-          <div className="table-section">
-            <PlayerTable
-              title="Players to Cheer For"
-              players={filteredCheeringFor}
-              onCountClick={handlePlayerCountClick}
-              emptyMessage={trimmedFilter.length >= 2 ? "No matching players" : "No players found in your selected teams' starting lineups"}
-            />
-          </div>
-
-          {/* Cheering Against table */}
-          <div className="table-section">
-            <PlayerTable
-              title="Players to Cheer Against"
-              players={filteredCheeringAgainst}
-              onCountClick={handlePlayerCountClick}
-              emptyMessage={trimmedFilter.length >= 2 ? "No matching players" : "No opponent players found for your selected teams"}
-            />
-          </div>
-        </div>
+        <AggregateTable
+          title="Gameday Allegiances"
+          players={filteredPlayers}
+          onCountClick={handleCountClick}
+          emptyMessage={
+            trimmedFilter.length >= 2
+              ? 'No matching players'
+              : 'No players found in your selected teams or their matchups'
+          }
+        />
       </div>
     </div>
   );

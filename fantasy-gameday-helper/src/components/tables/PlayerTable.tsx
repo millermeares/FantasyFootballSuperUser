@@ -228,7 +228,9 @@ export function PlayerTable({
                     <span className="player-name">{player.playerName}</span>
                   </td>
                   <td className="position-cell">
-                    <span className="position-badge">{player.position}</span>
+                    <span className="position-badge" data-position={player.position}>
+                      {player.position}
+                    </span>
                   </td>
                   <td className="team-cell">
                     <span className="team-name">{player.team}</span>
