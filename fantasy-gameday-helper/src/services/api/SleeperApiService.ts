@@ -309,7 +309,7 @@ export class SleeperApiService {
     try {
       await this.getNflState();
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   }

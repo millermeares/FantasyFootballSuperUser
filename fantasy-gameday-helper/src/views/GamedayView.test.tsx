@@ -5,7 +5,15 @@ import { AppProvider } from '../context';
 
 // Mock the PlayerTable component since we're testing GamedayView in isolation
 vi.mock('../components/tables', () => ({
-  PlayerTable: ({ title, subtitle, emptyMessage }: any) => (
+  PlayerTable: ({
+    title,
+    subtitle,
+    emptyMessage,
+  }: {
+    title?: string;
+    subtitle?: string;
+    emptyMessage?: string;
+  }) => (
     <div data-testid="player-table">
       <h3>{title}</h3>
       <p>{subtitle}</p>

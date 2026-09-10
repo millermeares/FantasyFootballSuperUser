@@ -1,8 +1,9 @@
-import React from 'react';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 import fc from 'fast-check';
-import { AppProvider, useAppContext } from './AppContext';
+import { AppProvider } from './AppContext';
+import { useAppContext } from './useAppContext';
+import type { AppContextType } from './AppContextInstance';
 import type { SleeperUser } from '../types/sleeper';
 import type { UserTeam } from '../types/app';
 
@@ -241,50 +242,34 @@ describe('AppContext', () => {
 
         if (uniqueTeams.length === 0) return true; // Skip empty arrays
 
-        // Test component that manages state internally
-        let contextValue: any = null;
-        
-        function PropertyTestComponent() {
-          const context = useAppContext();
-          contextValue = context;
-          
-          // Set initial teams
-          React.useEffect(() => {
-            context.dispatch({
-              type: 'SET_GAMEDAY_DATA',
-              payload: {
-                cheeringFor: [],
-                cheeringAgainst: [],
-                userTeams: uniqueTeams
-              }
-            });
-          }, []);
-
-          return <div data-testid="property-test">Property Test</div>;
-        }
-
-        // Render the component
-        const { unmount } = render(
-          <AppProvider>
-            <PropertyTestComponent />
-          </AppProvider>
-        );
-
-        // Wait for initial state to be set
-        act(() => {
-          // Force a re-render to ensure state is updated
+        // Render the context on its own so the latest value is always
+        // available through result.current
+        const { result, unmount } = renderHook<AppContextType, void>(() => useAppContext(), {
+          wrapper: AppProvider
         });
 
-        if (!contextValue || contextValue.state.userTeams.length === 0) {
+        // Set initial teams
+        act(() => {
+          result.current.dispatch({
+            type: 'SET_GAMEDAY_DATA',
+            payload: {
+              cheeringFor: [],
+              cheeringAgainst: [],
+              userTeams: uniqueTeams
+            }
+          });
+        });
+
+        if (result.current.state.userTeams.length === 0) {
           unmount();
           return true; // Skip if state not properly initialized
         }
 
         // Pick a random team to toggle
         const teamToToggle = uniqueTeams[Math.floor(Math.random() * uniqueTeams.length)];
-        const initialState = contextValue.state.userTeams;
+        const initialState = result.current.state.userTeams;
         const targetTeam = initialState.find((t: UserTeam) => t.leagueId === teamToToggle.leagueId);
-        
+
         if (!targetTeam) {
           unmount();
           return true; // Skip if team not found
@@ -294,10 +279,10 @@ describe('AppContext', () => {
 
         // Toggle the team
         act(() => {
-          contextValue.toggleTeam(teamToToggle.leagueId);
+          result.current.toggleTeam(teamToToggle.leagueId);
         });
 
-        const finalState = contextValue.state.userTeams;
+        const finalState = result.current.state.userTeams;
         const toggledTeam = finalState.find((t: UserTeam) => t.leagueId === teamToToggle.leagueId);
 
         // Verify the toggled team's selection state changed

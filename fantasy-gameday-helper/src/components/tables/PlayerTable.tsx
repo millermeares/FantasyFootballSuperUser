@@ -40,12 +40,13 @@ export function PlayerTable({
       let comparison = 0;
 
       switch (sortField) {
-        case 'count':
+        case 'count': {
           // For PlayerAllegiance, use count; for PlayerExposure, use teamCount
           const aCount = isPlayerExposure(a) ? a.teamCount : a.count;
           const bCount = isPlayerExposure(b) ? b.teamCount : b.count;
           comparison = aCount - bCount;
           break;
+        }
         case 'percentage':
           // Only available for PlayerExposure
           if (isPlayerExposure(a) && isPlayerExposure(b)) {

@@ -210,12 +210,10 @@ describe('App - Infinite Loop Regression Tests', () => {
     // Clear call counts after initial load
     vi.clearAllMocks();
 
-    // Change the week using the new number input interface
-    const weekInput = screen.getByRole('spinbutton', { name: /nfl week/i });
+    // Change the week using the week dropdown
+    const weekSelect = screen.getByRole('combobox', { name: /nfl week/i });
     await act(async () => {
-      await user.clear(weekInput);
-      await user.type(weekInput, '5');
-      await user.tab(); // Trigger blur event to apply the change
+      await user.selectOptions(weekSelect, '5');
     });
 
     // Wait for week change to complete

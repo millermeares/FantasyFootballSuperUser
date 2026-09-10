@@ -31,43 +31,37 @@
   margin: 0;
 }
 
-/* Number input */
-.week-input {
-  padding: 0.5rem;
+/* Week dropdown */
+.week-select {
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 1rem;
-  width: 100px;
-  text-align: center;
+  font-family: inherit;
+  color: #333;
+  background-color: #fff;
+  /* Custom chevron so the control looks identical across browsers */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%23555' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5 6 6.5l5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  background-size: 12px 8px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  min-height: 44px;
 }
 
-.week-input:focus {
+.week-select:focus {
   outline: none;
   border-color: #007bff;
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
-.week-input.error {
-  border-color: #dc3545;
-}
-
-.week-input:disabled {
+.week-select:disabled {
   background-color: #f8f9fa;
   cursor: not-allowed;
   opacity: 0.6;
-}
-
-/* Remove spinner arrows from number input */
-.week-input::-webkit-outer-spin-button,
-.week-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  appearance: none;
-  margin: 0;
-}
-
-.week-input[type=number] {
-  -moz-appearance: textfield;
-  appearance: textfield;
 }
 
 /* Refresh button */
@@ -97,28 +91,10 @@
   cursor: not-allowed;
 }
 
-/* Error messages */
-.error-message {
-  color: #dc3545;
-  font-size: 0.875rem;
-  margin: 0;
-}
-
-.validation-error {
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
-  border-radius: 4px;
-  padding: 0.5rem;
-}
-
 /* Responsive design */
 @media (max-width: 768px) {
   .week-input-group {
     gap: 0.75rem;
-  }
-
-  .week-input {
-    width: 120px;
   }
 
   .form-label {
@@ -135,10 +111,9 @@
     gap: 1rem;
   }
 
-  .week-input {
-    padding: 0.75rem;
+  .week-select {
+    padding: 0.75rem 2rem 0.75rem 0.75rem;
     font-size: 1.1rem;
-    width: 100px;
   }
 
   .refresh-week-button {
@@ -150,13 +125,13 @@
 
 /* High contrast mode */
 @media (prefers-contrast: high) {
-  .week-input,
+  .week-select,
   .refresh-week-button {
     border-width: 2px;
     border-color: #000;
   }
 
-  .week-input:focus {
+  .week-select:focus {
     border-color: #000;
     box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
   }

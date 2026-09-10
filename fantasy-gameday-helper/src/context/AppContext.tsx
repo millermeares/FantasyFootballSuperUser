@@ -1,7 +1,10 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import { useReducer, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { AppState, AppAction, GamedayData, ExposureData, PlayerAllegiance, PlayerExposure, UserTeam } from '../types';
 import type { SleeperUser } from '../types/sleeper';
+import { AppContext } from './AppContextInstance';
+import type { AppContextType } from './AppContextInstance';
+import { STORAGE_KEYS } from './persistence';
 
 // Initial state
 const initialState: AppState = {
@@ -172,40 +175,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
   }
 }
 
-// Context type
-interface AppContextType {
-  state: AppState;
-  dispatch: React.Dispatch<AppAction>;
-  // Action creators for convenience
-  setUser: (user: SleeperUser) => void;
-  clearUser: () => void;
-  setWeek: (week: number) => void;
-  setUserTeams: (teams: UserTeam[]) => void;
-  toggleTeam: (leagueId: string) => void;
-  selectAllTeams: () => void;
-  deselectAllTeams: () => void;
-  setGamedayData: (data: GamedayData) => void;
-  setExposureData: (data: ExposureData) => void;
-  setActiveTab: (tab: 'gameday' | 'exposure') => void;
-  setPlayerFilter: (filter: string) => void;
-  setLoading: (loading: boolean) => void;
-  setExposureLoading: (loading: boolean) => void;
-  setError: (error: string) => void;
-  clearError: () => void;
-  openPopup: (player: PlayerAllegiance | PlayerExposure, leagues: string[]) => void;
-  closePopup: () => void;
-}
-
-// Create context
-const AppContext = createContext<AppContextType | undefined>(undefined);
-
-// Local storage keys
-const STORAGE_KEYS = {
-  USER_IDENTIFIER: 'sleeper_user_identifier',
-  SELECTED_WEEK: 'sleeper_selected_week',
-  USER_TEAMS: 'sleeper_user_teams',
-} as const;
-
 // Provider component
 interface AppProviderProps {
   children: ReactNode;
@@ -359,34 +328,4 @@ export function AppProvider({ children }: AppProviderProps) {
   };
 
   return <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>;
-}
-
-// Custom hook to use the context
-export function useAppContext() {
-  const context = useContext(AppContext);
-  if (context === undefined) {
-    throw new Error('useAppContext must be used within an AppProvider');
-  }
-  return context;
-}
-
-// Helper function to get persisted user identifier
-export function getPersistedUserIdentifier(): string | null {
-  try {
-    return localStorage.getItem(STORAGE_KEYS.USER_IDENTIFIER);
-  } catch (error) {
-    console.warn('Failed to get persisted user identifier:', error);
-    return null;
-  }
-}
-
-// Helper function to clear all persisted state
-export function clearPersistedState(): void {
-  try {
-    localStorage.removeItem(STORAGE_KEYS.USER_IDENTIFIER);
-    localStorage.removeItem(STORAGE_KEYS.SELECTED_WEEK);
-    localStorage.removeItem(STORAGE_KEYS.USER_TEAMS);
-  } catch (error) {
-    console.warn('Failed to clear persisted state:', error);
-  }
 }

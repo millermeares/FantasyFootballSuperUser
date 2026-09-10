@@ -1,1 +1,4 @@
-export { AppProvider, useAppContext, getPersistedUserIdentifier, clearPersistedState } from './AppContext';
+export { AppProvider } from './AppContext';
+export { useAppContext } from './useAppContext';
+export { getPersistedUserIdentifier, clearPersistedState } from './persistence';
+export type { AppContextType } from './AppContextInstance';

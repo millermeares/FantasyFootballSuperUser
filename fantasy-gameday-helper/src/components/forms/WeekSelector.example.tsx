@@ -7,9 +7,7 @@ import { AppProvider } from '../../context';
  * 
  * This component provides:
  * - Dropdown selection for NFL weeks 1-18
- * - Number input for direct week entry
  * - Automatic current week detection via Sleeper API
- * - Validation for invalid week numbers
  * - Integration with global app state
  */
 

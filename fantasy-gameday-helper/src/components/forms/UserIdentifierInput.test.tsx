@@ -15,7 +15,9 @@ const mockSleeperApiService = {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  (SleeperApiService.getSleeperApiService as any).mockReturnValue(mockSleeperApiService);
+  vi.mocked(SleeperApiService.getSleeperApiService).mockReturnValue(
+    mockSleeperApiService as unknown as ReturnType<typeof SleeperApiService.getSleeperApiService>
+  );
   // Clear localStorage
   localStorage.clear();
 });

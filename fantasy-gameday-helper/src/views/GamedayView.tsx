@@ -7,33 +7,35 @@ interface GamedayViewProps {
   onPlayerCountClick: (playerId: string, leagues: string[]) => void;
 }
 
+/**
+ * Filter players by name or team abbreviation.
+ * A null query means no filtering is applied.
+ */
+function filterPlayers(players: PlayerAllegiance[], query: string | null): PlayerAllegiance[] {
+  if (query === null) return players;
+
+  return players.filter(
+    (p) =>
+      p.playerName.toLowerCase().includes(query) ||
+      p.team.toLowerCase().includes(query)
+  );
+}
+
 export function GamedayView({ onPlayerCountClick }: GamedayViewProps) {
   const { state } = useAppContext();
 
-  /**
-   * Filter players by the player filter (name or team abbreviation).
-   * Only applies when 2+ characters are entered.
-   */
-  const filterPlayers = useMemo(() => {
-    const query = state.playerFilter.trim().toLowerCase();
-    if (query.length < 2) return (players: PlayerAllegiance[]) => players;
-
-    return (players: PlayerAllegiance[]) =>
-      players.filter(
-        (p) =>
-          p.playerName.toLowerCase().includes(query) ||
-          p.team.toLowerCase().includes(query)
-      );
-  }, [state.playerFilter]);
+  // The player filter only applies when 2+ characters are entered
+  const trimmedFilter = state.playerFilter.trim();
+  const filterQuery = trimmedFilter.length >= 2 ? trimmedFilter.toLowerCase() : null;
 
   const filteredCheeringFor = useMemo(
-    () => (state.gamedayData ? filterPlayers(state.gamedayData.cheeringFor) : []),
-    [state.gamedayData, filterPlayers]
+    () => (state.gamedayData ? filterPlayers(state.gamedayData.cheeringFor, filterQuery) : []),
+    [state.gamedayData, filterQuery]
   );
 
   const filteredCheeringAgainst = useMemo(
-    () => (state.gamedayData ? filterPlayers(state.gamedayData.cheeringAgainst) : []),
-    [state.gamedayData, filterPlayers]
+    () => (state.gamedayData ? filterPlayers(state.gamedayData.cheeringAgainst, filterQuery) : []),
+    [state.gamedayData, filterQuery]
   );
 
   /**
@@ -96,7 +98,7 @@ export function GamedayView({ onPlayerCountClick }: GamedayViewProps) {
               title="Players to Cheer For"
               players={filteredCheeringFor}
               onCountClick={handlePlayerCountClick}
-              emptyMessage={state.playerFilter.trim().length >= 2 ? "No matching players" : "No players found in your selected teams' starting lineups"}
+              emptyMessage={trimmedFilter.length >= 2 ? "No matching players" : "No players found in your selected teams' starting lineups"}
             />
           </div>
 
@@ -106,7 +108,7 @@ export function GamedayView({ onPlayerCountClick }: GamedayViewProps) {
               title="Players to Cheer Against"
               players={filteredCheeringAgainst}
               onCountClick={handlePlayerCountClick}
-              emptyMessage={state.playerFilter.trim().length >= 2 ? "No matching players" : "No opponent players found for your selected teams"}
+              emptyMessage={trimmedFilter.length >= 2 ? "No matching players" : "No opponent players found for your selected teams"}
             />
           </div>
         </div>
