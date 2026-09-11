@@ -7,7 +7,10 @@ import {
 import './SlateFilter.css';
 
 interface SlateFilterProps {
-  /** How many of your players are in each slate, keyed by slate id. */
+  /**
+   * How many tracked players - yours and your opponents' - are in each slate,
+   * keyed by slate id.
+   */
   playerCounts: Record<string, number>;
   className?: string;
 }
@@ -22,7 +25,7 @@ interface SlateOption {
 
 /** The muted line under a game time: how much of the week it accounts for. */
 function describeCounts({ gameCount, playerCount }: SlateOption): string {
-  const players = `${playerCount} of your ${playerCount === 1 ? 'player' : 'players'}`;
+  const players = `${playerCount} ${playerCount === 1 ? 'player' : 'players'}`;
 
   if (gameCount === undefined) {
     return players;
@@ -108,7 +111,7 @@ export function SlateFilter({ playerCounts, className = '' }: SlateFilterProps) 
           {options.map((option) => (
             <div
               key={option.id}
-              // A game time holding none of your players still shows, so you can
+              // A game time holding no tracked players still shows, so you can
               // see that there is nothing there
               className={`slate-item ${option.playerCount === 0 ? 'is-empty' : ''}`.trim()}
             >

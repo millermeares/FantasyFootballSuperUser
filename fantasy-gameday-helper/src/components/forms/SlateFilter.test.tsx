@@ -116,9 +116,9 @@ describe('SlateFilter', () => {
 
     expect(rowLabels()).toEqual([thursday.label, sundayEarly.label, sundayNight.label]);
     expect(rowDetails()).toEqual([
-      '1 game · 1 of your player',
-      '2 games · 5 of your players',
-      '1 game · 0 of your players'
+      '1 game · 1 player',
+      '2 games · 5 players',
+      '1 game · 0 players'
     ]);
     for (const checkbox of screen.getAllByRole('checkbox')) {
       expect(checkbox).toBeChecked();
@@ -133,7 +133,7 @@ describe('SlateFilter', () => {
 
     expect(rowLabels()).toHaveLength(3);
 
-    // Same slates, but now some of your players are on a bye
+    // Same slates, but now some tracked players are on a bye
     rerender(tree({ [sundayEarly.id]: 5, [NO_GAME_SLATE_ID]: 2 }));
 
     expect(rowLabels()).toEqual([
@@ -142,7 +142,7 @@ describe('SlateFilter', () => {
       sundayNight.label,
       'No game'
     ]);
-    expect(rowDetails()).toContain('2 of your players');
+    expect(rowDetails()).toContain('2 players');
   });
 
   it('toggles a single game time off and back on', async () => {
@@ -197,7 +197,7 @@ describe('SlateFilter', () => {
     expect(rowLabels()).toHaveLength(3);
   });
 
-  it('marks game times holding none of your players', async () => {
+  it('marks game times holding no tracked players', async () => {
     const user = userEvent.setup();
     renderFilter({ [thursday.id]: 1, [sundayEarly.id]: 5 });
     act(() => context().setSlateData(slateData));
