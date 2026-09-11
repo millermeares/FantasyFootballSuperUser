@@ -191,7 +191,7 @@ describe('GamedayView slate filtering', () => {
     expect(visiblePlayerNames()).toContain('Thursday Player');
   });
 
-  it('counts each slate against your players', async () => {
+  it('counts the tracked players in each slate', async () => {
     const user = userEvent.setup();
     renderLoaded();
 
@@ -201,8 +201,8 @@ describe('GamedayView slate filtering', () => {
       (row) => row.textContent ?? ''
     );
 
-    expect(rows).toContain(`${sundayNight.label}1 game · 1 of your player`);
-    expect(rows).toContain('No game1 of your player');
+    expect(rows).toContain(`${sundayNight.label}1 game · 1 player`);
+    expect(rows).toContain('No game1 player');
   });
 
   it('explains an empty table caused by the slate filter', () => {

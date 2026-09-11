@@ -18,6 +18,7 @@
     "test:ci": "vitest --run --coverage",
     "deploy:preview": "npm run build && npm run preview",
     "update-players": "node scripts/update-players.js",
+    "test:data": "vitest --run src/data/players.test.ts",
     "verify:deployment": "node scripts/verify-deployment.js"
   },
   "dependencies": {

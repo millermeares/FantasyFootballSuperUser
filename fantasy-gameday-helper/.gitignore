@@ -39,3 +39,7 @@ coverage/
 
 # Build analysis
 stats.html
+
+# Scratch files from update-players (removed on exit; only linger if it is killed)
+src/data/players.json.tmp
+src/data/players.json.backup
