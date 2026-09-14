@@ -109,7 +109,10 @@ export interface AppState {
   playerFilter: string;
   /** Kickoff groupings for the selected week; null when they could not be loaded. */
   slateData: SlateData | null;
-  /** Slates whose players are shown. Reset to every slate when the week changes. */
+  /**
+   * Slates the view is narrowed to. Empty means no narrowing at all - every
+   * slate is shown - which is also where each new week starts.
+   */
   selectedSlateIds: string[];
   loading: boolean;
   exposureLoading: boolean; // Loading state specifically for exposure recalculations

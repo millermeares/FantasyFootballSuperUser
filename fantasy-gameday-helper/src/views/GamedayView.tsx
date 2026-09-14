@@ -70,9 +70,11 @@ export function GamedayView() {
     [aggregate, slateData]
   );
 
-  // Without kickoff times there is nothing to narrow by, so every player shows
+  // Nothing to narrow by - no kickoff times, or no game times picked - shows
+  // the whole week
   const visiblePlayers = useMemo(() => {
     if (!slateData || slateData.slates.length === 0) return filteredPlayers;
+    if (selectedSlateIds.length === 0) return filteredPlayers;
 
     return filteredPlayers.filter((player) =>
       selectedSlateIds.includes(slateIdForTeam(player.team, slateData))

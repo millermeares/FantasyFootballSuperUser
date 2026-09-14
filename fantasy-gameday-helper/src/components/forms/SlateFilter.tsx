@@ -34,12 +34,16 @@ function describeCounts({ gameCount, playerCount }: SlateOption): string {
   return `${gameCount} ${gameCount === 1 ? 'game' : 'games'} · ${players}`;
 }
 
-/** What the collapsed filter says it is currently showing. */
+/**
+ * What the collapsed filter says it is currently showing. Picking nothing shows
+ * the whole week, so it reads the same as picking everything.
+ */
 function summarizeSelection(options: SlateOption[], selectedIds: string[]): string {
   const selected = options.filter((option) => selectedIds.includes(option.id));
 
-  if (selected.length === 0) return 'No game times selected';
-  if (selected.length === options.length) return 'All game times';
+  if (selected.length === 0 || selected.length === options.length) {
+    return 'All game times';
+  }
 
   const shown = selected.slice(0, 3).map((option) => option.label).join(', ');
   const remaining = selected.length - 3;
@@ -84,6 +88,10 @@ export function SlateFilter({ playerCounts, className = '' }: SlateFilterProps) 
     selectedSlateIds.includes(option.id)
   ).length;
 
+  // A count only says something once the week is actually narrowed: none picked
+  // and all picked both show everything, so both read as plain "Game times"
+  const isNarrowed = selectedCount > 0 && selectedCount < options.length;
+
   return (
     <div className={`slate-filter ${className}`.trim()}>
       <div className="slate-filter-header">
@@ -96,7 +104,9 @@ export function SlateFilter({ playerCounts, className = '' }: SlateFilterProps) 
         >
           <span className={`expand-icon ${isExpanded ? 'expanded' : ''}`}>▼</span>
           <span className="slate-summary">
-            Game times ({selectedCount}/{options.length} selected)
+            {isNarrowed
+              ? `Game times (${selectedCount}/${options.length} selected)`
+              : 'Game times'}
           </span>
         </button>
       </div>

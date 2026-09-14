@@ -122,9 +122,3 @@ export function buildSlateData(
 export function slateIdForTeam(team: string, slateData: SlateData): string {
   return slateData.teamSlateIds[team] ?? NO_GAME_SLATE_ID;
 }
-
-/** Every slate id a selection can contain, including the "no game" bucket. */
-export function allSlateIds(slateData: SlateData | null): string[] {
-  if (!slateData) return [];
-  return [...slateData.slates.map((slate) => slate.id), NO_GAME_SLATE_ID];
-}

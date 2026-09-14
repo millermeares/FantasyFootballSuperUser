@@ -3,7 +3,6 @@ import {
   buildSlateData,
   formatSlateLabel,
   slateIdForTeam,
-  allSlateIds,
   NO_GAME_SLATE_ID,
   SLATE_GAP_MINUTES
 } from './ScheduleService';
@@ -162,7 +161,6 @@ describe('buildSlateData', () => {
 
     expect(slateData.slates).toEqual([]);
     expect(slateData.teamSlateIds).toEqual({});
-    expect(allSlateIds(slateData)).toEqual([NO_GAME_SLATE_ID]);
   });
 });
 
@@ -184,20 +182,5 @@ describe('formatSlateLabel', () => {
     const labels = buildSlateData(WEEK_1_2025).slates.map((slate) => slate.label);
 
     expect(new Set(labels).size).toBe(labels.length);
-  });
-});
-
-describe('allSlateIds', () => {
-  it('covers every slate plus the no-game bucket', () => {
-    const slateData = buildSlateData(WEEK_1_2025);
-
-    expect(allSlateIds(slateData)).toEqual([
-      ...slateData.slates.map((slate) => slate.id),
-      NO_GAME_SLATE_ID
-    ]);
-  });
-
-  it('has nothing to select when kickoff times are unavailable', () => {
-    expect(allSlateIds(null)).toEqual([]);
   });
 });

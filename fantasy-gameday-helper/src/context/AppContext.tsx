@@ -5,7 +5,6 @@ import type { SleeperUser } from '../types/sleeper';
 import { AppContext } from './AppContextInstance';
 import type { AppContextType } from './AppContextInstance';
 import { STORAGE_KEYS } from './persistence';
-import { allSlateIds } from '../services/ScheduleService';
 
 // Initial state
 const initialState: AppState = {
@@ -133,12 +132,12 @@ function appReducer(state: AppState, action: AppAction): AppState {
       };
 
     // A new week brings a new set of slates, so any previous selection no
-    // longer refers to anything: start over with everything shown.
+    // longer refers to anything: drop it and show the whole week again.
     case 'SET_SLATE_DATA':
       return {
         ...state,
         slateData: action.payload,
-        selectedSlateIds: allSlateIds(action.payload),
+        selectedSlateIds: [],
       };
 
     case 'TOGGLE_SLATE': {

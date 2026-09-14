@@ -98,16 +98,16 @@ describe('SlateFilter', () => {
     expect(screen.queryByText(/Game times/)).not.toBeInTheDocument();
   });
 
-  it('starts collapsed, summarising what it is showing', () => {
+  it('starts collapsed, showing the whole week with no count', () => {
     renderFilter({ [sundayEarly.id]: 5 });
     act(() => context().setSlateData(slateData));
 
-    expect(screen.getByText('Game times (3/3 selected)')).toBeInTheDocument();
+    expect(screen.getByText('Game times')).toBeInTheDocument();
     expect(screen.getByText('All game times')).toBeInTheDocument();
     expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
   });
 
-  it('opens into a checkbox per game time when tapped', async () => {
+  it('opens into an unchecked checkbox per game time when tapped', async () => {
     const user = userEvent.setup();
     renderFilter({ [thursday.id]: 1, [sundayEarly.id]: 5, [sundayNight.id]: 0 });
     act(() => context().setSlateData(slateData));
@@ -121,7 +121,7 @@ describe('SlateFilter', () => {
       '1 game · 0 players'
     ]);
     for (const checkbox of screen.getAllByRole('checkbox')) {
-      expect(checkbox).toBeChecked();
+      expect(checkbox).not.toBeChecked();
     }
   });
 
@@ -145,7 +145,7 @@ describe('SlateFilter', () => {
     expect(rowDetails()).toContain('2 players');
   });
 
-  it('toggles a single game time off and back on', async () => {
+  it('toggles a single game time on and back off', async () => {
     const user = userEvent.setup();
     renderFilter({ [sundayEarly.id]: 5 });
     act(() => context().setSlateData(slateData));
@@ -154,17 +154,18 @@ describe('SlateFilter', () => {
     const sundayEarlyCheckbox = screen.getByRole('checkbox', { name: sundayEarly.label });
 
     await user.click(sundayEarlyCheckbox);
-    expect(sundayEarlyCheckbox).not.toBeChecked();
-    expect(selectedSlateIds()).not.toContain(sundayEarly.id);
-    expect(selectedSlateIds()).toContain(thursday.id);
-    expect(screen.getByText('Game times (2/3 selected)')).toBeInTheDocument();
+    expect(sundayEarlyCheckbox).toBeChecked();
+    expect(selectedSlateIds()).toEqual([sundayEarly.id]);
+    expect(screen.getByText('Game times (1/3 selected)')).toBeInTheDocument();
 
     await user.click(sundayEarlyCheckbox);
-    expect(sundayEarlyCheckbox).toBeChecked();
-    expect(selectedSlateIds()).toContain(sundayEarly.id);
+    expect(sundayEarlyCheckbox).not.toBeChecked();
+    expect(selectedSlateIds()).toEqual([]);
+    expect(screen.getByText('Game times')).toBeInTheDocument();
   });
 
-  it('says so once every game time is hidden', () => {
+  // Picking every game time narrows nothing, so it reads like picking none
+  it('reads as the whole week once every game time is picked', () => {
     renderFilter({ [sundayEarly.id]: 5 });
     act(() => context().setSlateData(slateData));
 
@@ -172,8 +173,8 @@ describe('SlateFilter', () => {
       act(() => context().toggleSlate(slate.id));
     }
 
-    expect(screen.getByText('Game times (0/3 selected)')).toBeInTheDocument();
-    expect(screen.getByText('No game times selected')).toBeInTheDocument();
+    expect(screen.getByText('Game times')).toBeInTheDocument();
+    expect(screen.getByText('All game times')).toBeInTheDocument();
   });
 
   it('offers no bulk select controls', () => {
@@ -184,15 +185,16 @@ describe('SlateFilter', () => {
     expect(screen.getAllByRole('button')).toHaveLength(1);
   });
 
-  it('names the slates it is showing once some are hidden', async () => {
+  it('names the slates it is showing once some are picked', async () => {
     const user = userEvent.setup();
     renderFilter({ [sundayEarly.id]: 5 });
     act(() => context().setSlateData(slateData));
-    act(() => context().toggleSlate(sundayNight.id));
+    act(() => context().toggleSlate(thursday.id));
+    act(() => context().toggleSlate(sundayEarly.id));
 
     expect(screen.getByText(`${thursday.label}, ${sundayEarly.label}`)).toBeInTheDocument();
 
-    // ...and the list itself is still one tap away
+    // ...and the game times left out are still one tap away
     await user.click(expandButton());
     expect(rowLabels()).toHaveLength(3);
   });
@@ -213,13 +215,15 @@ describe('SlateFilter', () => {
     renderFilter({ [sundayEarly.id]: 5 });
     act(() => context().setSlateData(slateData));
     act(() => context().toggleSlate(sundayEarly.id));
-    expect(selectedSlateIds()).not.toContain(sundayEarly.id);
+    expect(selectedSlateIds()).toEqual([sundayEarly.id]);
 
+    // Last week's pick means nothing now, so the new week starts unnarrowed
     const nextWeek = buildSlateData([
       game(new Date('2025-09-14T17:00:00Z').getTime(), 'TB', 'ATL')
     ]);
     act(() => context().setSlateData(nextWeek));
 
-    expect(selectedSlateIds()).toEqual([nextWeek.slates[0].id, NO_GAME_SLATE_ID]);
+    expect(selectedSlateIds()).toEqual([]);
+    expect(screen.getByText('All game times')).toBeInTheDocument();
   });
 });

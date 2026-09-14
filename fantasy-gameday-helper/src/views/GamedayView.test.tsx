@@ -85,9 +85,10 @@ function game(startTime: string, away: string, home: string): SleeperGameScore {
 const slateData = buildSlateData([
   game('2025-09-05T00:20:00Z', 'DAL', 'PHI'), // Thu night
   game('2025-09-07T17:00:00Z', 'TB', 'ATL'), // Sun early
-  game('2025-09-08T00:20:00Z', 'BAL', 'BUF') // Sun night
+  game('2025-09-08T00:20:00Z', 'BAL', 'BUF'), // Sun night
+  game('2025-09-09T00:15:00Z', 'NYJ', 'NE') // Mon night - no tracked players
 ]);
-const [, sundayEarly, sundayNight] = slateData.slates;
+const [thursday, sundayEarly, sundayNight, mondayNight] = slateData.slates;
 
 function allegiance(playerName: string, team: string): PlayerAllegiance {
   return {
@@ -146,13 +147,18 @@ describe('GamedayView slate filtering', () => {
 
   function visiblePlayerNames(): string[] {
     return screen
-      .getAllByRole('listitem')
+      .queryAllByRole('listitem')
       .map((item) => item.textContent ?? '');
   }
 
-  it('shows every player until a slate is deselected', () => {
+  function selectedSlateIds(): string[] {
+    return context().state.selectedSlateIds;
+  }
+
+  it('shows every player until a game time is picked', () => {
     renderLoaded();
 
+    expect(selectedSlateIds()).toEqual([]);
     expect(visiblePlayerNames().sort()).toEqual([
       'Bye Player',
       'Night Player',
@@ -161,34 +167,47 @@ describe('GamedayView slate filtering', () => {
     ]);
   });
 
-  it('drops the players in a deselected slate', () => {
+  it('narrows to the one game time that is picked', () => {
     renderLoaded();
 
     act(() => context().toggleSlate(sundayEarly.id));
 
-    expect(visiblePlayerNames()).not.toContain('Sunday Player');
-    expect(visiblePlayerNames()).toContain('Night Player');
+    expect(visiblePlayerNames()).toEqual(['Sunday Player']);
   });
 
-  it('narrows to one slate when the others are cleared', () => {
+  it('widens as more game times are picked', () => {
     renderLoaded();
 
     act(() => {
       context().toggleSlate(sundayEarly.id);
       context().toggleSlate(sundayNight.id);
-      context().toggleSlate(NO_GAME_SLATE_ID);
     });
 
-    expect(visiblePlayerNames()).toEqual(['Thursday Player']);
+    expect(visiblePlayerNames().sort()).toEqual(['Night Player', 'Sunday Player']);
+  });
+
+  // The way back to the whole week is to clear what you picked
+  it('shows every player again once the last game time is unpicked', () => {
+    renderLoaded();
+
+    act(() => context().toggleSlate(sundayEarly.id));
+    expect(visiblePlayerNames()).toEqual(['Sunday Player']);
+
+    act(() => context().toggleSlate(sundayEarly.id));
+    expect(visiblePlayerNames()).toHaveLength(4);
   });
 
   it('separates players on a bye from players with a game', () => {
     renderLoaded();
 
     act(() => context().toggleSlate(NO_GAME_SLATE_ID));
+    expect(visiblePlayerNames()).toEqual(['Bye Player']);
 
-    expect(visiblePlayerNames()).not.toContain('Bye Player');
-    expect(visiblePlayerNames()).toContain('Thursday Player');
+    act(() => {
+      context().toggleSlate(NO_GAME_SLATE_ID);
+      context().toggleSlate(thursday.id);
+    });
+    expect(visiblePlayerNames()).toEqual(['Thursday Player']);
   });
 
   it('counts the tracked players in each slate', async () => {
@@ -208,11 +227,9 @@ describe('GamedayView slate filtering', () => {
   it('explains an empty table caused by the slate filter', () => {
     renderLoaded();
 
-    act(() => {
-      for (const slate of slateData.slates) context().toggleSlate(slate.id);
-      context().toggleSlate(NO_GAME_SLATE_ID);
-    });
+    act(() => context().toggleSlate(mondayNight.id));
 
+    expect(visiblePlayerNames()).toEqual([]);
     expect(screen.getByText('No players in the selected game times')).toBeInTheDocument();
   });
 
